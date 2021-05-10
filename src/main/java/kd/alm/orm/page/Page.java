@@ -1,6 +1,5 @@
 package kd.alm.orm.page;
 
-import kd.bos.orm.query.QFilter;
 import lombok.Data;
 import lombok.ToString;
 
@@ -50,14 +49,7 @@ public class Page<T> implements Serializable {
      * 数据
      */
     private List<T> data;
-    /**
-     * 排序字段
-     */
-    private String orderBy;
-    /**
-     * 排序方式
-     */
-    private Sorter sorter;
+
 
     @SafeVarargs
     public final void handleSort(Comparator<? super T>... comparators) {
