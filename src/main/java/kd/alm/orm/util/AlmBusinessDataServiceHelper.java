@@ -1,4 +1,4 @@
-package kd.alm.orm;
+package kd.alm.orm.util;
 
 import kd.bos.cache.CacheFactory;
 import kd.bos.cache.DistributeSessionlessCache;

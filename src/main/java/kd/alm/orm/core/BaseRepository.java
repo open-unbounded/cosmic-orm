@@ -1,5 +1,7 @@
-package kd.alm.orm;
+package kd.alm.orm.core;
 
+import kd.alm.orm.page.Page;
+import kd.alm.orm.page.PageRequest;
 import kd.bos.dataentity.OperateOption;
 import kd.bos.entity.operate.result.OperationResult;
 import kd.bos.orm.query.QFilter;
@@ -105,6 +107,8 @@ public interface BaseRepository<T> {
      */
     int selectCount(T record);
 
+    <R> int selectCount(List<QFilter> qFilters, Class<R> queryClass);
+
     /**
      * 查询单条数据
      * NOTE:生成的查询条件字段之间是AND关系
@@ -156,4 +160,24 @@ public interface BaseRepository<T> {
      * @return 条件
      */
     <R> List<QFilter> genQFilter(R record);
+
+    /**
+     * 分页查询
+     *
+     * @param record      实体类
+     * @param pageRequest 分页请求
+     * @return 结果数据
+     */
+    Page<T> selectPage(T record, PageRequest pageRequest);
+
+    /**
+     * 分页查询
+     *
+     * @param qFilters    实体类
+     * @param pageRequest 分页请求
+     * @param resultClass 结果类
+     * @return 结果数据
+     */
+    <R> Page<R> selectPage(List<QFilter> qFilters, PageRequest pageRequest, Class<R> resultClass);
+
 }
