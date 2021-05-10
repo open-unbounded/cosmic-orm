@@ -1,4 +1,4 @@
-package kd.alm.orm;
+package kd.alm.orm.util;
 
 import com.google.common.collect.Sets;
 import kd.bos.algo.DataSet;

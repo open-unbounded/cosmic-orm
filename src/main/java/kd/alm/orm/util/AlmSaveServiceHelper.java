@@ -1,7 +1,5 @@
-package kd.alm.orm;
+package kd.alm.orm.util;
 
-import kd.bos.dataentity.OperateOption;
-import kd.bos.entity.operate.result.OperationResult;
 import kd.bos.logging.Log;
 import kd.bos.logging.LogFactory;
 import kd.bos.servicehelper.operation.SaveServiceHelper;
