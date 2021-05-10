@@ -18,8 +18,11 @@ import java.util.ArrayList;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@ToString
 public class MulValueSet extends ArrayList<MulValueSet.ValueSet> {
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 
     /**
      * </p>
