@@ -1,0 +1,13 @@
+// 请根据您本地的苍穹jar包路径，修改以下地址
+ext
+{
+	path=[ 
+		trd:'../devops/mservice-cosmic/lib/trd',
+		boscorelib:'../devops/mservice-cosmic/lib/bos',
+		bos:'../devops/mservice-cosmic/lib/bos',
+		biz:'../devops/mservice-cosmic/lib/biz',
+		cus:'../devops/mservice-cosmic/lib/cus',
+		currentapp:'../devops/mservice-cosmic/lib/biz',
+		outputdir:'../devops/mservice-cosmic/lib/biz'
+	]
+}

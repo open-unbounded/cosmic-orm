@@ -1,0 +1,102 @@
+//plugins {
+//    id 'com.github.johnrengelman.shadow' version '6.0.0'
+//}
+// 添加原工程依赖
+
+apply from: "./config.gradle"
+apply plugin: 'java'
+apply plugin: 'eclipse'
+//apply plugin: "com.github.johnrengelman.shadow"
+
+repositories {
+    maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+    maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
+    maven {
+        credentials {
+            username '600e21e54fb2132a19dcd064'
+            password 'KomhsDCOTCF-'
+        }
+        url 'https://packages.aliyun.com/maven/repository/2070470-release-UxBa7E/'
+    }
+    maven {
+        credentials {
+            username '600e21e54fb2132a19dcd064'
+            password 'KomhsDCOTCF-'
+        }
+        url 'https://packages.aliyun.com/maven/repository/2070470-snapshot-0pdCJB/'
+    }
+    mavenCentral()
+}
+def ormVersion = '0.0.1'
+group = 'de.cd'
+version = ormVersion
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+def cus = ext.path.cus
+def trd = ext.path.trd
+def bos = ext.path.bos
+def outputdir = ext.path.outputdir
+def currentapp = ext.path.currentapp
+def biz = ext.path.biz
+def pathLib = ext.path.pathLib
+
+
+dependencies {
+    //编译依赖
+    //compile project(':NextGen_clouds_plugin')
+
+    compile fileTree(dir: bos, include: '*.jar')
+    compile fileTree(dir: cus, include: '*.jar', exclude: ['middleware.jar'])
+    compile fileTree(dir: trd, include: '*.jar')
+    compile fileTree(dir: biz, include: '*.jar')
+    // https://mvnrepository.com/artifact/com.alibaba/fastjson
+//    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.72'
+    compile group: 'org.hibernate.validator', name: 'hibernate-validator', version: '6.1.5.Final'
+    compile group: 'com.sap.conn.jco', name: 'sapjco', version: '3.0.14'
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    testCompileOnly 'org.projectlombok:lombok:1.18.12'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+
+
+}
+
+
+jar {
+    baseName = 'alm-orm'
+    version = ormVersion
+//    from(configurations.compile.collect {
+//        it.name.endsWithAny(
+//                "sapjco-3.0.14.jar") ? zipTree(it) : null
+//    })
+}
+
+//shadowJar {
+//    zip64 true
+//}
+
+task sourcesJar(type: Jar, dependsOn: build) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task copytolib(type: Copy, dependsOn: build) {
+    group 'build'
+    description '拷贝本工程构建jar包到lib'
+    from 'build/libs'
+    into outputdir
+
+    exclude '*source*.jar'
+}
+
+
+task copyJarTodir(type: Copy) {
+    group 'build'
+    description '拷贝工程产生的build.jar到本地库'
+    from 'build/libs'
+    into cus
+    exclude '**/*.class'
+}
+test.ignoreFailures true
