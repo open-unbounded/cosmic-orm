@@ -1,6 +1,6 @@
 package kd.alm.orm.test;
 
-import kd.alm.orm.BaseRepositoryImpl;
+import kd.alm.orm.core.impl.BaseRepositoryImpl;
 import org.springframework.stereotype.Repository;
 
 /**

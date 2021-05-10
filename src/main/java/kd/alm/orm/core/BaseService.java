@@ -1,4 +1,4 @@
-package kd.alm.orm;
+package kd.alm.orm.core;
 
 
 /**

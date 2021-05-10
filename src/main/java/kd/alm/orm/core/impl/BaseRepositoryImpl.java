@@ -1,11 +1,17 @@
-package kd.alm.orm;
+package kd.alm.orm.core.impl;
 
 import com.google.common.base.CaseFormat;
+import kd.alm.orm.MulValueSet;
 import kd.alm.orm.annotation.Entity;
 import kd.alm.orm.annotation.Entry;
 import kd.alm.orm.annotation.PrimaryKey;
 import kd.alm.orm.annotation.ValueSet;
+import kd.alm.orm.core.BaseRepository;
 import kd.alm.orm.exception.OrmRuntimeException;
+import kd.alm.orm.page.Page;
+import kd.alm.orm.page.PageRequest;
+import kd.alm.orm.util.AlmBusinessDataServiceHelper;
+import kd.alm.orm.util.AlmSaveServiceHelper;
 import kd.alm.orm.util.ReflectionUtils;
 import kd.bos.dataentity.OperateOption;
 import kd.bos.dataentity.entity.DynamicObject;
@@ -585,9 +591,13 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
     @Override
     public int selectCount(T record) {
         final Class<T> c = (Class<T>) record.getClass();
-        ReflectionUtils.checkEntity(c);
-        final List<QFilter> qFilters = genQFilter(record);
-        final String entityName = ReflectionUtils.getAnnotationEntity(c).value();
+        return this.selectCount(genQFilter(record), c);
+    }
+
+    @Override
+    public <R> int selectCount(List<QFilter> qFilters, Class<R> queryClass) {
+        ReflectionUtils.checkEntity(queryClass);
+        final String entityName = ReflectionUtils.getAnnotationEntity(queryClass).value();
         final DynamicObject[] dynamicObjects = AlmBusinessDataServiceHelper.load(entityName, "id", qFilters.toArray(new QFilter[0]));
         return dynamicObjects != null ? dynamicObjects.length : 0;
     }
@@ -687,5 +697,32 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
     @Override
     public void update(T record) {
         this.update(Collections.singletonList(record));
+    }
+
+    @Override
+    public Page<T> selectPage(T record, PageRequest pageRequest) {
+        final Class<T> c = (Class<T>) record.getClass();
+
+        final List<QFilter> qFilters = this.genQFilter(record);
+
+        return this.selectPage(qFilters, pageRequest, c);
+    }
+
+    @Override
+    public <R> Page<R> selectPage(List<QFilter> qFilters, PageRequest pageRequest, Class<R> resultClass) {
+
+        final int selectCount = this.selectCount(qFilters, resultClass);
+
+        final Page<R> page = Page.buildPage(selectCount, pageRequest);
+
+        final Field[] allField = ReflectionUtils.getAllField(resultClass);
+        final List<String> selectFields = getSelectFields(allField);
+        final String entityName = ReflectionUtils.getAnnotationEntity(resultClass).value();
+
+        final DynamicObject[] dynamicObjects = AlmBusinessDataServiceHelper.load(entityName, String.join(",", selectFields), qFilters.toArray(new QFilter[0]), pageRequest.toOrderBys(), pageRequest.getPage(), pageRequest.getSize());
+
+        final List<R> list = mapObject(resultClass, allField, dynamicObjects);
+        page.getData().addAll(list);
+        return null;
     }
 }

@@ -1,6 +1,7 @@
-package kd.alm.orm;
+package kd.alm.orm.core.impl;
 
 
+import kd.alm.orm.core.BaseService;
 
 /**
  * </p>
