@@ -1,0 +1,2 @@
+//include ':NextGen_clouds_plugin'
+//project(':NextGen_clouds_plugin').projectDir = new File(settingsDir, '../NextGen_clouds_plugin')
