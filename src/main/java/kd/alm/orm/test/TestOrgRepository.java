@@ -1,6 +1,6 @@
 package kd.alm.orm.test;
 
-import kd.alm.orm.BaseRepository;
+import kd.alm.orm.core.BaseRepository;
 
 /**
  * </p>
