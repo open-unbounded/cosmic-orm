@@ -159,7 +159,7 @@ public interface BaseRepository<T> {
      * @param record 实体类
      * @return 条件
      */
-    <R> List<QFilter> genQFilter(R record);
+    <R> List<QFilter> buildQFilter(R record);
 
     /**
      * 分页查询
