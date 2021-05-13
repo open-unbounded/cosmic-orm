@@ -98,22 +98,6 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
         }
     }
 
-//    /**
-//     * 获取对应字段名称的Field信息
-//     *
-//     * @param c         Class
-//     * @param fieldName 字段名
-//     * @param <T>       泛型
-//     * @return Field信息
-//     */
-//    public static <T> Field getField(Class<T> c, String fieldName) {
-//        Field field = ReflectionUtils.getField(c, fieldName);
-//        assert field != null;
-//        ReflectionUtils.makeAccessible(field);
-//        return field;
-//    }
-
-
     /**
      * 设置DynamicObject的值
      *
@@ -172,14 +156,45 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
             } else if (Iterable.class.isAssignableFrom(field.getType()) && field.isAnnotationPresent(Entry.class)) {
                 // 单据体
                 if (v != null) {
-                    final Iterable entryList = (Iterable) v;
+                    final Iterable<?> entryList = (Iterable<?>) field.get(t);
                     final Class<?> c = ReflectionUtils.getFieldGenericType(field);
-                    final Field[] entryAllField = ReflectionUtils.getAllField(c);
+                    final Field[] entryAllField = kd.alm.utils.ReflectionUtils.getAllField(c);
                     final DynamicObjectCollection dynamicObjectCollection = dynamicObject.getDynamicObjectCollection(formFieldName);
+
+                    //
+                    // 获取全部的行主键
+                    // ------------------------------------------------------------------------------
+                    // 主键字段
+                    final Field primaryKeyField = ReflectionUtils.getPrimaryKeyFieldOptional(c)
+                            .orElseThrow(() -> {
+                                // 不存在主键注解,抛出异常
+                                final Entry entry = field.getAnnotation(Entry.class);
+                                return new KDBizException("单据体:".concat(entry.value()).concat("不存在主键注解@PrimaryKey"));
+                            });
+
+                    // 主键
+                    Set<String> keys = new HashSet<>();
                     for (Object o : entryList) {
-                        final DynamicObject entryDo = dynamicObjectCollection.addNew();
+                        // 获取对应的主键
+                        String value = (String) ReflectionUtils.getValue(o, primaryKeyField);
+                        if (value != null) {
+                            keys.add(value);
+                        }
+                    }
+
+                    // 删除不存在的数据
+                    dynamicObjectCollection.removeIf(next -> !keys.contains(next.getString("id")));
+                    // 建立映射关系
+                    final Map<String/*主键*/, DynamicObject/*数据*/> dynamicObjectMap = dynamicObjectCollection.stream()
+                            .collect(Collectors.toMap(it -> it.getString("id"), it -> it));
+                    for (Object o : entryList) {
+                        String id = (String) ReflectionUtils.getValue(o, primaryKeyField);
+                        // 存在则直接使用,不存在则新增
+                        DynamicObject entryDo = dynamicObjectMap.computeIfAbsent(id, x -> dynamicObjectCollection.addNew());
+                        // 映射对象
                         mapDynamicObjectValue(o, entryAllField, entryDo);
                     }
+
                 }
             }
         }
@@ -405,7 +420,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
     }
 
     @Override
-    public <R> List<QFilter> genQFilter(R record) {
+    public <R> List<QFilter> buildQFilter(R record) {
         final Class<R> c = (Class<R>) record.getClass();
         final Field[] allField = ReflectionUtils.getAllField(c);
         final ArrayList<QFilter> qFilters = new ArrayList<>();
@@ -423,10 +438,9 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
                             final String formFiledName = formFiledNameOptional.get();
                             if (o instanceof Iterable) {
                                 // 可迭代的数据
-                                final Iterator iterator = ((Iterable) o).iterator();
-                                if (iterator.hasNext()) {
-                                    qFilters.add(new QFilter(formFiledName, QCP.in, o));
-                                }
+                                final ArrayList<Object> ids = new ArrayList<>();
+                                ((Iterable<?>) o).forEach(ids::add);
+                                qFilters.add(new QFilter(formFiledName, QCP.in, ids));
                             } else {
                                 qFilters.add(new QFilter(formFiledName, QCP.equals, o));
                                 if (ReflectionUtils.isAnnotationPresent(field, PrimaryKey.class)) {
@@ -583,7 +597,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
     public int delete(T record) {
         final Class<T> c = (Class<T>) record.getClass();
         ReflectionUtils.checkEntity(c);
-        final List<QFilter> qFilters = genQFilter(record);
+        final List<QFilter> qFilters = buildQFilter(record);
         final String entityName = ReflectionUtils.getAnnotationEntity(c).value();
         return DeleteServiceHelper.delete(entityName, qFilters.toArray(new QFilter[0]));
     }
@@ -591,7 +605,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
     @Override
     public int selectCount(T record) {
         final Class<T> c = (Class<T>) record.getClass();
-        return this.selectCount(genQFilter(record), c);
+        return this.selectCount(buildQFilter(record), c);
     }
 
     @Override
@@ -605,7 +619,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
     @Override
     public Optional<T> selectOne(T record) {
         final Class<T> c = (Class<T>) record.getClass();
-        final List<QFilter> qFilters = genQFilter(record);
+        final List<QFilter> qFilters = buildQFilter(record);
         final String entityName = ReflectionUtils.getAnnotationEntity(c).value();
         final Optional<DynamicObject> dynamicObjectOptional = AlmBusinessDataServiceHelper.loadSingleOptional(entityName, qFilters.toArray(new QFilter[0]));
         if (dynamicObjectOptional.isPresent()) {
@@ -623,7 +637,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
     @Override
     public List<T> select(T record) {
         final Class<T> c = (Class<T>) record.getClass();
-        final List<QFilter> qFilters = this.genQFilter(record);
+        final List<QFilter> qFilters = this.buildQFilter(record);
         return this.select(qFilters, c);
     }
 
@@ -703,7 +717,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
     public Page<T> selectPage(T record, PageRequest pageRequest) {
         final Class<T> c = (Class<T>) record.getClass();
 
-        final List<QFilter> qFilters = this.genQFilter(record);
+        final List<QFilter> qFilters = this.buildQFilter(record);
 
         return this.selectPage(qFilters, pageRequest, c);
     }
