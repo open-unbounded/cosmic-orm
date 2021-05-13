@@ -1,11 +1,11 @@
 package kd.alm.orm.util;
 
 import com.google.common.base.CaseFormat;
-
 import kd.alm.orm.annotation.Entity;
 import kd.alm.orm.annotation.Entry;
 import kd.alm.orm.annotation.PrimaryKey;
 import kd.alm.orm.annotation.ValueSet;
+import kd.bos.exception.KDBizException;
 import kd.bos.logging.Log;
 import kd.bos.logging.LogFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -156,8 +156,8 @@ public class ReflectionUtils {
     }
 
     public static Optional<String> getDBFieldNameOptional(Field field) {
-        if (isAnnotationPresent(field, kd.alm.orm.annotation.Field.class)) {
-            final kd.alm.orm.annotation.Field fieldAnnotation = field.getAnnotation(kd.alm.orm.annotation.Field.class);
+        if (isAnnotationPresent(field, kd.alm.utils.db.annotation.Field.class)) {
+            final kd.alm.utils.db.annotation.Field fieldAnnotation = field.getAnnotation(kd.alm.utils.db.annotation.Field.class);
             if (!fieldAnnotation.isDBField()) {
                 // 非数据表字段则直接返回
                 return Optional.empty();
@@ -166,8 +166,22 @@ public class ReflectionUtils {
         final Optional<String> formFieldNameOptional = getFormFieldNameOptional(field);
         if (formFieldNameOptional.isPresent()) {
             String formFieldName = formFieldNameOptional.get();
-            formFieldName = formFieldName.split("\\.")[0];
-            return Optional.of(formFieldName);
+            final String[] split = formFieldName.split("\\.");
+            if (split.length == 1) {
+                // @Field("name")
+                return Optional.of(split[0]);
+            } else if (split.length == 2 && split[1].equals("id")) {
+                // @Field("didi_asset_id.id")
+                return Optional.of(split[0]);
+            } else {
+                // 错误示例:
+                // @Field("didi_asset_id.name")
+                // @Field("didi_asset_id.asset_model")
+                // 正确示例
+                // @Field("didi_asset_id.name", isDBField = false)
+                // @Field("didi_asset_id.asset_model", isDBField = false)
+                throw new KDBizException(String.format("%s:标识不合法.该字段为当前非数据表字段,请使用@Field(value = \"%s\", isDBField = false)", field.getName(), formFieldName));
+            }
         }
         return Optional.empty();
     }
