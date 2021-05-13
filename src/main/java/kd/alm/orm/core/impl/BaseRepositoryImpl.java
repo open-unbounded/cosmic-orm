@@ -118,38 +118,45 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
 
             if (field.isAnnotationPresent(PrimaryKey.class)) {
                 // 主键
-                if (v == null || v.equals(0L)) {
+                if ("0".equals(v)) {
                     // 创建ID
                     v = ID.genLongId();
                 }
                 dynamicObject.set("id", v);
             } else if (field.isAnnotationPresent(kd.alm.orm.annotation.Field.class)) {
-                if (v != null) {
-                    final DynamicProperty property = dynamicObjectType.getProperty(formFieldName);
-                    if (property instanceof BasedataProp) {
-                        // 是基础资料
-                        String entityId;
-                        if (property instanceof ItemClassProp) {
-                            // 是多类别基础资料
-                            final String typePropName = ((ItemClassProp) property).getTypePropName();
-                            entityId = dynamicObject.getString(typePropName);
-                            if (StringUtils.isBlank(formFieldName)) {
-                                throw new KDBizException(String.format("[%s]字段对应的多类别资产资料未被赋值", field.getName()));
-                            }
-                        } else {
-                            entityId = ((BasedataProp) property).getBaseEntityId();
-                        }
+                final DynamicProperty property = dynamicObjectType.getProperty(formFieldName);
+                if (property instanceof BasedataProp) {
+                    // 是基础资料
 
-                        final Optional<DynamicObject> vOptional = AlmBusinessDataServiceHelper.loadSingleOptional(v, entityId);
-                        if (vOptional.isPresent()) {
-                            v = vOptional.get();
-                        } else {
-                            if (((BasedataProp) property).isMustInput() && !v.equals(0L)) {
-                                throw new KDBizException(String.format("[%s]字段对应的基础资料数据不存在", field.getName()));
-                            }
-                        }
-
+                    // 必录校验
+                    if (((BasedataProp) property).isMustInput() && (v == null || "0".equals(v))) {
+                        throw new KDBizException(String.format("[%s]字段对应的基础资料数据不存在,改字段为必录字段", field.getName()));
                     }
+                    // 基础资料字段对应的表单标识
+                    String entityName;
+                    if (property instanceof ItemClassProp) {
+                        // 是多类别基础资料
+                        final String typePropName = ((ItemClassProp) property).getTypePropName();
+                        entityName = dynamicObject.getString(typePropName);
+                        if (StringUtils.isBlank(entityName)) {
+                            throw new KDBizException(String.format("[%s]字段对应的多类别资料对应的多类别基础资料类型未被赋值", field.getName()));
+                        }
+                    } else {
+                        // 普通基础资料
+                        entityName = ((BasedataProp) property).getBaseEntityId();
+                    }
+                    final Optional<DynamicObject> vOptional = kd.alm.utils.AlmBusinessDataServiceHelper.loadSingleOptional(v, entityName);
+                    if (vOptional.isPresent()) {
+                        // 数据存在
+                        v = vOptional.get();
+                        dynamicObject.set(formFieldName, v);
+                    } else {
+                        // 必录校验
+                        if (((BasedataProp) property).isMustInput()) {
+                            throw new KDBizException(String.format("[%s]字段对应的基础资料数据不存在,改字段为必录字段", field.getName()));
+                        }
+                    }
+                } else {
                     dynamicObject.set(formFieldName, v);
                 }
 
