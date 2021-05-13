@@ -130,7 +130,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
 
                     // 必录校验
                     if (((BasedataProp) property).isMustInput() && (v == null || "0".equals(v))) {
-                        throw new KDBizException(String.format("[%s]字段对应的基础资料数据不存在,改字段为必录字段", field.getName()));
+                        throw new KDBizException(String.format("[%s]字段对应的基础资料数据不存在,该字段为必录字段", field.getName()));
                     }
                     // 基础资料字段对应的表单标识
                     String entityName;
@@ -153,7 +153,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
                     } else {
                         // 必录校验
                         if (((BasedataProp) property).isMustInput()) {
-                            throw new KDBizException(String.format("[%s]字段对应的基础资料数据不存在,改字段为必录字段", field.getName()));
+                            throw new KDBizException(String.format("[%s]字段对应的基础资料数据不存在,该字段为必录字段", field.getName()));
                         }
                     }
                 } else {
