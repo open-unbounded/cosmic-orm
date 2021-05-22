@@ -20,7 +20,7 @@ import java.util.Optional;
 public interface BaseRepository<T> {
     /**
      * 保存操作
-     * TODO
+     * TODO 此处暂不支持嵌套事务
      *
      * @param t      待保存的数据
      * @param option 操作
@@ -29,8 +29,8 @@ public interface BaseRepository<T> {
     OperationResult saveOperate(T t, OperateOption option);
 
     /**
-     * 保存操作
-     * TODO
+     * 批量保存操作
+     * TODO 此处暂不支持嵌套事务
      *
      * @param list   待保存的数据列表
      * @param option 操作
@@ -39,8 +39,7 @@ public interface BaseRepository<T> {
     OperationResult saveOperate(List<T> list, OperateOption option);
 
     /**
-     * 保存
-     * TODO
+     * 批量保存
      *
      * @param list 数据
      */
@@ -48,15 +47,13 @@ public interface BaseRepository<T> {
 
     /**
      * 保存
-     * TODO
      *
      * @param record 数据
      */
     void save(T record);
 
     /**
-     * 更新
-     * TODO
+     * 批量更新
      *
      * @param list 数据
      */
@@ -64,7 +61,6 @@ public interface BaseRepository<T> {
 
     /**
      * 更新
-     * TODO
      *
      * @param record 数据
      */
@@ -80,7 +76,7 @@ public interface BaseRepository<T> {
     int delete(T record);
 
     /**
-     * 查询
+     * 查询列表
      *
      * @param fieldName 字段
      * @param value     值
@@ -89,7 +85,7 @@ public interface BaseRepository<T> {
     List<T> select(String fieldName, Object value);
 
     /**
-     * 查询
+     * 查询列表
      *
      * @param key         字段
      * @param value       值
@@ -107,6 +103,14 @@ public interface BaseRepository<T> {
      */
     int selectCount(T record);
 
+    /**
+     * 统计满足条件的条数
+     *
+     * @param qFilters   查询条件
+     * @param queryClass 查询类
+     * @param <R>        泛型
+     * @return 条数
+     */
     <R> int selectCount(List<QFilter> qFilters, Class<R> queryClass);
 
     /**
