@@ -5,8 +5,8 @@ import lombok.ToString;
 import org.apache.commons.collections4.CollectionUtils;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * </p>
@@ -18,6 +18,7 @@ import java.util.List;
 @Data
 @ToString
 public class PageRequest implements Serializable {
+    private static final long serialVersionUID = 7909018768787247681L;
     /**
      * 条数
      */
@@ -39,13 +40,31 @@ public class PageRequest implements Serializable {
     public String toOrderBys() {
         // 通过 orderBys 字符串接收排序逻辑
         if (CollectionUtils.isNotEmpty(this.orders)) {
-            final StringBuilder stringBuffer = new StringBuilder();
+            final StringJoiner stringJoiner = new StringJoiner(", ");
             for (Order order : this.orders) {
-                stringBuffer.append(order.getOrderBy()).append(" ").append(order.getSorter().toString());
+                stringJoiner.add(order.getOrderBy().concat(" ").concat(order.getSorter().toString()));
             }
-            return stringBuffer.toString();
+
+            return stringJoiner.toString();
         }
         return null;
     }
+
+    /**
+     * 返回排序
+     *
+     * @return 排序
+     */
+    public String[] toOrderByArray() {
+        if (CollectionUtils.isNotEmpty(this.orders)) {
+            final String[] orderByArray = new String[this.orders.size()];
+            for (int i = 0; i < this.orders.size(); i++) {
+                orderByArray[i] = this.orders.get(i).getOrderBy().concat(" ").concat(this.orders.get(i).getSorter().toString());
+            }
+            return orderByArray;
+        }
+        return null;
+    }
+
 
 }
