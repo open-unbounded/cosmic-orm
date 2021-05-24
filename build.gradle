@@ -6,6 +6,7 @@
 apply from: "./config.gradle"
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'maven'
 //apply plugin: "com.github.johnrengelman.shadow"
 
 repositories {
@@ -27,8 +28,8 @@ repositories {
     }
     mavenCentral()
 }
-def ormVersion = '0.0.1'
-group = 'de.cd'
+def ormVersion = '1.0.1'
+group = 'kd.alm'
 version = ormVersion
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
@@ -65,7 +66,7 @@ dependencies {
 
 
 jar {
-    baseName = 'alm-orm'
+    archiveName = 'alm-orm'
     version = ormVersion
 //    from(configurations.compile.collect {
 //        it.name.endsWithAny(
@@ -80,6 +81,18 @@ jar {
 task sourcesJar(type: Jar, dependsOn: build) {
     classifier = 'sources'
     from sourceSets.main.allSource
+}
+
+// 上传jar到远程阿里仓库
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: "https://packages.aliyun.com/maven/repository/2070470-release-UxBa7E/") {
+                // 配置maven库的用户名和密码 (userName/password)
+                authentication(userName: "600e21e54fb2132a19dcd064", password: "KomhsDCOTCF-")
+            }
+        }
+    }
 }
 
 task copytolib(type: Copy, dependsOn: build) {
