@@ -1,6 +1,10 @@
 package kd.alm.orm.util;
 
 import com.google.common.collect.Sets;
+import kd.alm.utils.AlmBusinessDataServiceHelper;
+import kd.alm.utils.Page;
+import kd.alm.utils.PageRequest;
+import kd.alm.utils.db.DataSetHandleFunction;
 import kd.bos.algo.DataSet;
 import kd.bos.algo.DataType;
 import kd.bos.algo.Row;
@@ -30,6 +34,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -257,57 +262,57 @@ public class AlmDB {
     }
 
 
-//    /**
-//     * 根据ID分页
-//     *
-//     * @param pkList      主键
-//     * @param function    根据输入的已分页ID查询数据
-//     * @param pageRequest 分页
-//     * @param <T>
-//     * @return 分页数据
-//     */
-//    public static <T> Page<T> doPageByIds(List<Long> pkList, Function<List<Long>, Collection<T>> function, PageRequest pageRequest) {
-//        // 计算查询的个数
-//        int total = pkList.size();
-//        Page<T> tPage = new Page<>();
-//        // 计算总页数
-//        double totalPage = Math.ceil((double) total / pageRequest.getSize());
-//
-//        tPage.setPage(pageRequest.getPage());
-//        tPage.setSize(pageRequest.getSize());
-//        tPage.setTotalPage((int) totalPage);
-//        tPage.setTotalSize(total);
-//
-//        int nextPage;
-//        int pervPage;
-//        Map<Object, DynamicObject> resultMap = new HashMap<>(16);
-//        if (pageRequest.getPage() > totalPage) {
-//            nextPage = -1;
-//            pervPage = -1;
-//
-//        } else {
-//            int fromIndex = pageRequest.getPage() * pageRequest.getSize();
-//            int toIndex = fromIndex + pageRequest.getSize();
-//            if (toIndex > total) {
-//                toIndex = total;
-//            }
-//
-//            // 待查询的主键列表
-//            List<Long> pageIdList = pkList.subList(fromIndex, toIndex);
-//            // 获取分页结果
-//            Collection<T> result = function.apply(pageIdList);
-//            tPage.setData(result);
-//            // 计算分页前/后页码
-//            nextPage = pageRequest.getPage() - 1;
-//            pervPage = pageRequest.getPage() + 1;
-//            if (pervPage == totalPage) {
-//                pervPage = -1;
-//            }
-//        }
-//        tPage.setNextPage(nextPage);
-//        tPage.setPervPage(pervPage);
-//        return tPage;
-//    }
+    /**
+     * 根据ID分页
+     *
+     * @param pkList      主键
+     * @param function    根据输入的已分页ID查询数据
+     * @param pageRequest 分页
+     * @param <T>
+     * @return 分页数据
+     */
+    public static <T> Page<T> doPageByIds(List<Long> pkList, Function<List<Long>, Collection<T>> function, PageRequest pageRequest) {
+        // 计算查询的个数
+        int total = pkList.size();
+        Page<T> tPage = new Page<>();
+        // 计算总页数
+        double totalPage = Math.ceil((double) total / pageRequest.getSize());
+
+        tPage.setPage(pageRequest.getPage());
+        tPage.setSize(pageRequest.getSize());
+        tPage.setTotalPage((int) totalPage);
+        tPage.setTotalSize(total);
+
+        int nextPage;
+        int pervPage;
+        Map<Object, DynamicObject> resultMap = new HashMap<>(16);
+        if (pageRequest.getPage() > totalPage) {
+            nextPage = -1;
+            pervPage = -1;
+
+        } else {
+            int fromIndex = pageRequest.getPage() * pageRequest.getSize();
+            int toIndex = fromIndex + pageRequest.getSize();
+            if (toIndex > total) {
+                toIndex = total;
+            }
+
+            // 待查询的主键列表
+            List<Long> pageIdList = pkList.subList(fromIndex, toIndex);
+            // 获取分页结果
+            Collection<T> result = function.apply(pageIdList);
+            tPage.setData(result);
+            // 计算分页前/后页码
+            nextPage = pageRequest.getPage() - 1;
+            pervPage = pageRequest.getPage() + 1;
+            if (pervPage == totalPage) {
+                pervPage = -1;
+            }
+        }
+        tPage.setNextPage(nextPage);
+        tPage.setPervPage(pervPage);
+        return tPage;
+    }
 
     /**
      * 最大可能的合并两个DataSet
@@ -328,66 +333,66 @@ public class AlmDB {
         return left.union(right);
     }
 
-//    /**
-//     * DataSet 连接处理
-//     *
-//     * @param left   DataSet
-//     * @param right  DataSet left
-//     * @param handle DataSet right
-//     * @return
-//     */
-//    public static DataSet join(DataSet left, DataSet right, DataSetHandleFunction handle) {
-//        HashSet<String> aSet = Sets.newHashSet(left.getRowMeta().getFieldNames());
-//        HashSet<String> bSet = Sets.newHashSet(right.getRowMeta().getFieldNames());
-//        Set<String> cSet = SetUtils.intersection(aSet, bSet).toSet();
-//        aSet.removeAll(cSet);
-//        Set<String> bSetIntersection = cSet.stream().map(it -> it + " AS b_" + it).collect(Collectors.toSet());
-//        aSet.addAll(bSetIntersection);
-//        left = left.select(aSet.toArray(new String[0]));
-//        right = right.select(bSet.toArray(new String[0]));
-//
-//        return handle.handle(left, right);
-//    }
-//
-//    /**
-//     * 内连接
-//     *
-//     * @param left             DataSet
-//     * @param right            DataSet
-//     * @param leftOnFieldName  left DataSet的连接字段
-//     * @param rightOnFieldName right DataSet的连接字段
-//     * @return DataSet
-//     */
-//    public static DataSet join(DataSet left, DataSet right, String leftOnFieldName, String rightOnFieldName) {
-//        return join(left, right, (a, b) -> a.join(b).on(leftOnFieldName, rightOnFieldName).select(a.getRowMeta().getFieldNames(), b.getRowMeta().getFieldNames()).finish());
-//    }
+    /**
+     * DataSet 连接处理
+     *
+     * @param left   DataSet
+     * @param right  DataSet left
+     * @param handle DataSet right
+     * @return
+     */
+    public static DataSet join(DataSet left, DataSet right, DataSetHandleFunction handle) {
+        HashSet<String> aSet = Sets.newHashSet(left.getRowMeta().getFieldNames());
+        HashSet<String> bSet = Sets.newHashSet(right.getRowMeta().getFieldNames());
+        Set<String> cSet = SetUtils.intersection(aSet, bSet).toSet();
+        aSet.removeAll(cSet);
+        Set<String> bSetIntersection = cSet.stream().map(it -> it + " AS b_" + it).collect(Collectors.toSet());
+        aSet.addAll(bSetIntersection);
+        left = left.select(aSet.toArray(new String[0]));
+        right = right.select(bSet.toArray(new String[0]));
 
-//    /**
-//     * 左连接
-//     *
-//     * @param left             DataSet
-//     * @param right            DataSet
-//     * @param leftOnFieldName  left DataSet的连接字段
-//     * @param rightOnFieldName right DataSet的连接字段
-//     * @return DataSet
-//     */
-//    public static DataSet leftJoin(DataSet left, DataSet right, String leftOnFieldName, String rightOnFieldName) {
-//        return join(left, right, (a, b) -> a.leftJoin(b).on(leftOnFieldName, rightOnFieldName).select(a.getRowMeta().getFieldNames(), b.getRowMeta().getFieldNames()).finish());
-//
-//    }
+        return handle.handle(left, right);
+    }
 
-//    /**
-//     * 右连接
-//     *
-//     * @param left             DataSet
-//     * @param right            DataSet
-//     * @param leftOnFieldName  left DataSet的连接字段
-//     * @param rightOnFieldName right DataSet的连接字段
-//     * @return DataSet
-//     */
-//    public static DataSet rightJoin(DataSet left, DataSet right, String leftOnFieldName, String rightOnFieldName) {
-//        return join(left, right, (a, b) -> a.rightJoin(b).on(leftOnFieldName, rightOnFieldName).select(a.getRowMeta().getFieldNames(), b.getRowMeta().getFieldNames()).finish());
-//    }
+    /**
+     * 内连接
+     *
+     * @param left             DataSet
+     * @param right            DataSet
+     * @param leftOnFieldName  left DataSet的连接字段
+     * @param rightOnFieldName right DataSet的连接字段
+     * @return DataSet
+     */
+    public static DataSet join(DataSet left, DataSet right, String leftOnFieldName, String rightOnFieldName) {
+        return join(left, right, (a, b) -> a.join(b).on(leftOnFieldName, rightOnFieldName).select(a.getRowMeta().getFieldNames(), b.getRowMeta().getFieldNames()).finish());
+    }
+
+    /**
+     * 左连接
+     *
+     * @param left             DataSet
+     * @param right            DataSet
+     * @param leftOnFieldName  left DataSet的连接字段
+     * @param rightOnFieldName right DataSet的连接字段
+     * @return DataSet
+     */
+    public static DataSet leftJoin(DataSet left, DataSet right, String leftOnFieldName, String rightOnFieldName) {
+        return join(left, right, (a, b) -> a.leftJoin(b).on(leftOnFieldName, rightOnFieldName).select(a.getRowMeta().getFieldNames(), b.getRowMeta().getFieldNames()).finish());
+
+    }
+
+    /**
+     * 右连接
+     *
+     * @param left             DataSet
+     * @param right            DataSet
+     * @param leftOnFieldName  left DataSet的连接字段
+     * @param rightOnFieldName right DataSet的连接字段
+     * @return DataSet
+     */
+    public static DataSet rightJoin(DataSet left, DataSet right, String leftOnFieldName, String rightOnFieldName) {
+        return join(left, right, (a, b) -> a.rightJoin(b).on(leftOnFieldName, rightOnFieldName).select(a.getRowMeta().getFieldNames(), b.getRowMeta().getFieldNames()).finish());
+    }
 
     /**
      * 生成单据体select field 语句
@@ -529,6 +534,54 @@ public class AlmDB {
 
         final IDataEntityType dataEntityType = dynamicObject.getDataEntityType();
         final DataEntityPropertyCollection properties = dataEntityType.getProperties();
+//        String fieldName;
+//        String markFieldName;
+//        Method method;
+//        for (IDataEntityProperty property : properties) {
+//
+//            markFieldName = property.getName();
+//            fieldName = formatFieldName(markFieldName);
+//            // 优先从关系表
+//            method = methodHashMap.get(relationMap.get(fieldName));
+//            //
+//            if (method == null) {
+//                method = methodHashMap.get(fieldName);
+//            }
+//            if (method == null && markFieldName.startsWith("digi_")) {
+//                fieldName = markFieldName.substring(5);
+//                method = methodHashMap.get(fieldName);
+//            }
+//            if (method == null) {
+//                // 跳过这个字段
+//                continue;
+//            }
+//            Object value;
+//            try {
+//                value = method.invoke(obj);
+////                final IDataEntityProperty entityProperty = properties.get(markFieldName);
+//                if (value != null && property instanceof BasedataProp) {
+//                    // 如果是基础资料则转换
+//                    try {
+//                        // 获取对应的DynamicObject
+//                        value = AlmBusinessDataServiceHelper.loadSingle(value, ((BasedataProp) property).getBaseEntityId());
+//                    } catch (Exception e) {
+//                        // 数据不存在
+//                        throw new KDBizException(String.format("[%s]字段对应的基础资料数据不存在", fieldName));
+//                    }
+//                }
+//                if (allowNullMap) {
+//                    // 允许null映射
+//                    dynamicObject.set(markFieldName, value);
+//                } else {
+//                    // 不允许null映射
+//                    if (value != null) {
+//                        // 不为空才更新
+//                        dynamicObject.set(markFieldName, value);
+//                    }
+//                }
+//            } catch (IllegalAccessException | InvocationTargetException ignored) {
+//            }
+//        }
 
         String fieldName;
         String markFieldName;
@@ -590,5 +643,107 @@ public class AlmDB {
         return dynamicObject;
     }
 
+//    public static <T> List<DynamicObject> mapDynamicObject(Iterable<T> list) {
+//        assert list != null;
+//        final ArrayList<DynamicObject> dynamicObjectArrayList = new ArrayList<>();
+//        final Iterator<T> iterator = list.iterator();
+//        // get方法
+//        Map<String, Method> methodMap = null;
+//        // 表单标识
+//        String entityName = null;
+//        Map<String/*标识*/, Field/*实体字段名*/> fieldMap = new HashMap<>();
+//        if (iterator.hasNext()) {
+//            final T t = iterator.next();
+//            final Class<?> c = t.getClass();
+//            final Entity entity = c.getAnnotation(Entity.class);
+//            entityName = entity.value();
+//            methodMap = AlmDB.getAllGetMethod(c);
+//
+//            Class<?> tmpClass = c;
+//            while (c != null && !tmpClass.getName().toLowerCase().equals("java.lang.object")) {
+//                Map<String, Field> map = Arrays.stream(tmpClass.getDeclaredFields())
+//                        .filter(it -> it.isAnnotationPresent(kd.alm.utils.db.annotation.Field.class))
+//                        .collect(Collectors.toMap(it -> {
+//                            final String formFieldName = it.getAnnotation(kd.alm.utils.db.annotation.Field.class).value();
+//                            if (StringUtils.isBlank(formFieldName)) {
+//                                // 转下划线
+//                                return "digi_" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, it.getName());
+//                            }
+//                            return formFieldName;
+//                        }, it -> it));
+//                fieldMap.putAll(map);
+//                // 父级
+//                tmpClass = tmpClass.getSuperclass();
+//            }
+//            dynamicObjectArrayList.add(setDynamicObject(methodMap, entityName, fieldMap, t));
+//
+//        }
+//        while (iterator.hasNext()) {
+//            final T t = iterator.next();
+//            dynamicObjectArrayList.add(setDynamicObject(methodMap, entityName, fieldMap, t));
+//        }
+//        return dynamicObjectArrayList;
+//    }
+
+//    private static <T> DynamicObject setDynamicObject(Map<String, Method> methodMap, String entityName, Map<String, Field> fieldMap, T t) {
+//        final DynamicObject dynamicObject = AlmBusinessDataServiceHelper.newDynamicObject(entityName);
+//        final DynamicObjectType dynamicObjectType = dynamicObject.getDynamicObjectType();
+//        for (Map.Entry<String, Field> entry : fieldMap.entrySet()) {
+//            Field field = entry.getValue();
+//            final String formName = entry.getKey();
+//            // 获取get方法
+//            final Method method = methodMap.get(field.getName());
+//
+//            try {
+//                Object v = method.invoke(t);
+//                if (field.isAnnotationPresent(PrimaryKey.class)) {
+//                    if (v == null || v.equals(0L)) {
+//                        // 创建ID
+//                        v = ID.genLongId();
+//                    }
+//                    dynamicObject.set(formName, v);
+//
+//                } else if (field.isAnnotationPresent(kd.alm.utils.db.annotation.Field.class)) {
+//                    // 数据不为空
+//                    if (v != null) {
+//                        final DynamicProperty property = dynamicObjectType.getProperty(formName);
+//                        if (property instanceof BasedataProp) {
+//                            // 是基础资料
+//                            String entityId;
+//                            if (property instanceof ItemClassProp) {
+//                                // 是多类别基础资料
+//                                final String typePropName = ((ItemClassProp) property).getTypePropName();
+//                                entityId = dynamicObject.getString(typePropName);
+//                                if (StringUtils.isBlank(formName)) {
+//                                    throw new KDBizException(String.format("[%s]字段对应的多类别资产资料未被赋值", field.getName()));
+//                                }
+//                            } else {
+//                                entityId = ((BasedataProp) property).getBaseEntityId();
+//                            }
+//
+//                            final Optional<DynamicObject> vOptional = AlmBusinessDataServiceHelper.loadSingleOptional(v, entityId);
+//                            if (vOptional.isPresent()) {
+//                                v = vOptional.get();
+//                            } else {
+//                                if (((BasedataProp) property).isMustInput() && !v.equals(0L)) {
+//                                    throw new KDBizException(String.format("[%s]字段对应的基础资料数据不存在", field.getName()));
+//                                }
+//                            }
+//
+//                        }
+//                    }
+//                    dynamicObject.set(formName, v);
+//                } else if (field.isAnnotationPresent(Entry.class) && Iterable.class.isAssignableFrom(field.getType())) {
+//                    mapDynamicObject((Iterable) v);
+//                }
+//
+//
+//            } catch (IllegalAccessException | InvocationTargetException e) {
+//                log.error("数据映射失败");
+//                e.printStackTrace();
+//            }
+//        }
+//        return dynamicObject;
+//    }
 
 }
