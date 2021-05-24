@@ -28,7 +28,7 @@ repositories {
     }
     mavenCentral()
 }
-def ormVersion = '1.0.2'
+def ormVersion = '1.0.3'
 group = 'kd.alm'
 version = ormVersion
 tasks.withType(JavaCompile) {
