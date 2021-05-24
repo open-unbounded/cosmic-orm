@@ -156,8 +156,8 @@ public class ReflectionUtils {
     }
 
     public static Optional<String> getDBFieldNameOptional(Field field) {
-        if (isAnnotationPresent(field, kd.alm.utils.db.annotation.Field.class)) {
-            final kd.alm.utils.db.annotation.Field fieldAnnotation = field.getAnnotation(kd.alm.utils.db.annotation.Field.class);
+        if (isAnnotationPresent(field, kd.alm.orm.annotation.Field.class)) {
+            final kd.alm.orm.annotation.Field fieldAnnotation = field.getAnnotation(kd.alm.orm.annotation.Field.class);
             if (!fieldAnnotation.isDBField()) {
                 // 非数据表字段则直接返回
                 return Optional.empty();
