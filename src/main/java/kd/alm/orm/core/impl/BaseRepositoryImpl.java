@@ -199,7 +199,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
                         // 存在则直接使用,不存在则新增
                         DynamicObject entryDo = dynamicObjectMap.get(id);
                         if(entryDo == null){
-                            dynamicObjectCollection.addNew();
+                            entryDo = dynamicObjectCollection.addNew();
                         }
                         // 映射对象
                         mapDynamicObjectValue(o, entryAllField, entryDo);
