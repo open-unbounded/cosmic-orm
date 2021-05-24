@@ -165,7 +165,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
                 if (v != null) {
                     final Iterable<?> entryList = (Iterable<?>) field.get(t);
                     final Class<?> c = ReflectionUtils.getFieldGenericType(field);
-                    final Field[] entryAllField = kd.alm.utils.ReflectionUtils.getAllField(c);
+                    final Field[] entryAllField = ReflectionUtils.getAllField(c);
                     final DynamicObjectCollection dynamicObjectCollection = dynamicObject.getDynamicObjectCollection(formFieldName);
 
                     //
