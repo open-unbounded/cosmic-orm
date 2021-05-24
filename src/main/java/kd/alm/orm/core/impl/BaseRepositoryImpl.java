@@ -197,7 +197,10 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
                     for (Object o : entryList) {
                         String id = (String) ReflectionUtils.getValue(o, primaryKeyField);
                         // 存在则直接使用,不存在则新增
-                        DynamicObject entryDo = dynamicObjectMap.computeIfAbsent(id, x -> dynamicObjectCollection.addNew());
+                        DynamicObject entryDo = dynamicObjectMap.get(id);
+                        if(entryDo == null){
+                            dynamicObjectCollection.addNew();
+                        }
                         // 映射对象
                         mapDynamicObjectValue(o, entryAllField, entryDo);
                     }
