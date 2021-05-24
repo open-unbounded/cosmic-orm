@@ -1,12 +1,10 @@
 package kd.alm.orm.util;
 
+import kd.alm.orm.annotation.PrimaryKey;
 import kd.alm.utils.AlmBusinessDataServiceHelper;
 import kd.alm.utils.Page;
 import kd.alm.utils.PageRequest;
 import kd.alm.utils.PageUtils;
-import kd.alm.utils.db.AlmDB;
-import kd.alm.utils.db.query.PrimaryKey;
-import kd.alm.utils.db.query.Query;
 import kd.bos.algo.DataSet;
 import kd.bos.algo.Row;
 import kd.bos.dataentity.entity.DynamicObject;
@@ -278,76 +276,6 @@ public class AlmQueryServiceHelper extends QueryServiceHelper {
     public static <T> Optional<T> queryOne(String algoKey, String entityName, String selectFields, QFilter[] filters, Class<T> calzz) {
         DataSet pageDataSet = queryDataSet(algoKey, entityName, selectFields, filters, null, 0, 1, null);
         return Optional.ofNullable(AlmDB.queryOne(pageDataSet, calzz));
-    }
-
-    /**
-     * 查询 DataSet
-     * NOTE:filters 查询条件只作用于主查询语句,如需过滤query内容,请查询之后使用DataSet.filter过滤
-     *
-     * @param algoKey      algoKey
-     * @param entityName   单据标识
-     * @param selectFields 查询字段
-     * @param querys       子查询
-     * @param filters      查询条件
-     * @param orderBys     排序
-     * @param from         起始
-     * @param length       长度
-     * @param distinctable 去重
-     * @param <T>          IDataEntityProperty子类泛型
-     * @return DataSet
-     */
-    public static <T extends IDataEntityProperty> DataSet queryBaseSet(String algoKey, String entityName, String selectFields, List<Query<T>> querys, QFilter[] filters, String orderBys, int from, int length, Distinctable distinctable) {
-
-        ORM orm = ORM.create();
-        final DynamicObject dynamicObject = AlmBusinessDataServiceHelper.newDynamicObject(entityName);
-        final DataEntityPropertyCollection properties = dynamicObject.getDataEntityType().getProperties();
-
-        final String[] querySelectFields = querys.stream().map(it -> it.getSelectFields(properties)).toArray(String[]::new);
-        if (querySelectFields.length != 0) {
-            selectFields = selectFields.concat(",").concat(String.join(",", querySelectFields));
-        }
-        final DataSet dataSet = orm.queryDataSet(algoKey, entityName, selectFields, filters, orderBys, from, length, distinctable);
-
-
-        final Map<String, ? extends Class<? extends IDataEntityProperty>> propertiesMap = properties.stream().collect(Collectors.toMap(IMetadata::getName, IDataEntityProperty::getClass));
-        final DataSet copy = dataSet.copy();
-        // 不同字段主键的IDs
-        final HashMap<String, ArrayList<PrimaryKey>> map = new HashMap<>(16);
-        while (copy.hasNext()) {
-            final Row next = copy.next();
-            for (Query<T> query : querys) {
-                final String primaryKeyField = query.getPrimaryKeyField();
-                final Class<? extends IDataEntityProperty> aClass = propertiesMap.get(query.getPrimaryKeyField());
-                // 与query类型相同
-                if (query.getPropClass().equals(aClass)) {
-                    // 获取主键字段ID
-                    final ArrayList<PrimaryKey> orDefault = map.getOrDefault(primaryKeyField, new ArrayList<>());
-                    Optional<PrimaryKey> primaryKey = query.handlePrimaryKey(next, properties);
-
-                    // 主键信息
-                    if (primaryKey.isPresent()) {
-                        orDefault.add(primaryKey.get());
-                        map.put(primaryKeyField, orDefault);
-                    }
-                }
-
-            }
-        }
-
-        // 字段名对应的表单标识名
-        DataSet join = dataSet;
-        DataSet ds;
-        for (Query<T> query : querys) {
-            final String primaryKeyField = query.getPrimaryKeyField();
-            final ArrayList<PrimaryKey> ids = map.get(primaryKeyField);
-            ds = query.query(ids);
-            if (ds != null) {
-                join = AlmDB.leftJoin(dataSet, ds, "f_" + primaryKeyField, primaryKeyField);
-
-            }
-        }
-        return join;
-
     }
 
     public static Optional<DataSet> queryAndUnion(Map<String, Set<String>> map) {
