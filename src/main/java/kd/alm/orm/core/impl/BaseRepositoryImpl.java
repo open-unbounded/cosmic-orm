@@ -145,7 +145,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
                         // 普通基础资料
                         entityName = ((BasedataProp) property).getBaseEntityId();
                     }
-                    final Optional<DynamicObject> vOptional = kd.alm.utils.AlmBusinessDataServiceHelper.loadSingleOptional(v, entityName);
+                    final Optional<DynamicObject> vOptional = AlmBusinessDataServiceHelper.loadSingleOptional(v, entityName);
                     if (vOptional.isPresent()) {
                         // 数据存在
                         v = vOptional.get();

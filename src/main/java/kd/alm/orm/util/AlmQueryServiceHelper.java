@@ -1,8 +1,7 @@
 package kd.alm.orm.util;
 
-import kd.alm.utils.Page;
-import kd.alm.utils.PageRequest;
-import kd.alm.utils.PageUtils;
+import kd.alm.orm.page.Page;
+import kd.alm.orm.page.PageRequest;
 import kd.bos.algo.DataSet;
 import kd.bos.algo.Row;
 import kd.bos.orm.ORM;
