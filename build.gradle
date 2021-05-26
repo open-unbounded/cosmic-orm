@@ -28,7 +28,7 @@ repositories {
     }
     mavenCentral()
 }
-def ormVersion = '1.0.6'
+def ormVersion = '1.0.6-SNAPSHOT'
 group = 'kd.alm'
 version = ormVersion
 tasks.withType(JavaCompile) {
@@ -87,7 +87,7 @@ task sourcesJar(type: Jar, dependsOn: build) {
 uploadArchives {
     repositories {
         mavenDeployer {
-            repository(url: "https://packages.aliyun.com/maven/repository/2070470-release-UxBa7E/") {
+            repository(url: "https://packages.aliyun.com/maven/repository/2070470-snapshot-0pdCJB/") {
                 // 配置maven库的用户名和密码 (userName/password)
                 authentication(userName: "600e21e54fb2132a19dcd064", password: "KomhsDCOTCF-")
             }
