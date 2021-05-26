@@ -747,6 +747,6 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
 
         final List<R> list = mapObject(resultClass, allField, dynamicObjects);
         page.getData().addAll(list);
-        return null;
+        return page;
     }
 }
