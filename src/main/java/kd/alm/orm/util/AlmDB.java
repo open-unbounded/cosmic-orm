@@ -1,9 +1,8 @@
 package kd.alm.orm.util;
 
 import com.google.common.collect.Sets;
-import kd.alm.utils.AlmBusinessDataServiceHelper;
-import kd.alm.utils.Page;
-import kd.alm.utils.PageRequest;
+import kd.alm.orm.page.Page;
+import kd.alm.orm.page.PageRequest;
 import kd.bos.algo.DataSet;
 import kd.bos.algo.DataType;
 import kd.bos.algo.Row;
@@ -270,7 +269,7 @@ public class AlmDB {
      * @param <T>
      * @return 分页数据
      */
-    public static <T> Page<T> doPageByIds(List<Long> pkList, Function<List<Long>, Collection<T>> function, PageRequest pageRequest) {
+    public static <T> Page<T> doPageByIds(List<Long> pkList, Function<List<Long>, List<T>> function, PageRequest pageRequest) {
         // 计算查询的个数
         int total = pkList.size();
         Page<T> tPage = new Page<>();
@@ -299,7 +298,7 @@ public class AlmDB {
             // 待查询的主键列表
             List<Long> pageIdList = pkList.subList(fromIndex, toIndex);
             // 获取分页结果
-            Collection<T> result = function.apply(pageIdList);
+            List<T> result = function.apply(pageIdList);
             tPage.setData(result);
             // 计算分页前/后页码
             nextPage = pageRequest.getPage() - 1;
