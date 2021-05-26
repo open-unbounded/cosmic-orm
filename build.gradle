@@ -49,13 +49,10 @@ dependencies {
     //compile project(':NextGen_clouds_plugin')
 
     compile fileTree(dir: bos, include: '*.jar')
-    compile fileTree(dir: cus, include: '*.jar', exclude: ['middleware.jar'])
+    //compile fileTree(dir: cus, include: '*.jar', exclude: ['middleware.jar'])
     compile fileTree(dir: trd, include: '*.jar')
     compile fileTree(dir: biz, include: '*.jar')
     // https://mvnrepository.com/artifact/com.alibaba/fastjson
-//    compile group: 'com.alibaba', name: 'fastjson', version: '1.2.72'
-    compile group: 'org.hibernate.validator', name: 'hibernate-validator', version: '6.1.5.Final'
-    compile group: 'com.sap.conn.jco', name: 'sapjco', version: '3.0.14'
     compileOnly 'org.projectlombok:lombok:1.18.12'
     annotationProcessor 'org.projectlombok:lombok:1.18.12'
     testCompileOnly 'org.projectlombok:lombok:1.18.12'
@@ -78,11 +75,14 @@ jar {
 //    zip64 true
 //}
 
-task sourcesJar(type: Jar, dependsOn: build) {
+task sourcesJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allSource
 }
 
+artifacts {
+    archives sourcesJar
+}
 // 上传jar到远程阿里仓库
 uploadArchives {
     repositories {
