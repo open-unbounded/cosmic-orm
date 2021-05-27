@@ -3,6 +3,7 @@ package kd.alm.orm.page;
 import lombok.Data;
 import lombok.ToString;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.logging.log4j.util.Strings;
 
 import java.io.Serializable;
 import java.util.List;
@@ -27,6 +28,9 @@ public class PageRequest implements Serializable {
      * 页码
      */
     private int page = 0;
+
+    private String orderBys;
+
     /**
      * 排序
      */
@@ -39,14 +43,18 @@ public class PageRequest implements Serializable {
      */
     public String toOrderBys() {
         // 通过 orderBys 字符串接收排序逻辑
-        if (CollectionUtils.isNotEmpty(this.orders)) {
-            final StringJoiner stringJoiner = new StringJoiner(", ");
-            for (Order order : this.orders) {
-                stringJoiner.add(order.getOrderBy().concat(" ").concat(order.getSorter().toString()));
-            }
+        if (CollectionUtils.isEmpty(this.orders) && Strings.isNotEmpty(this.orderBys)) {
+            return this.orderBys;
+        } else
+            // 通过 orderBys 字符串接收排序逻辑
+            if (CollectionUtils.isNotEmpty(this.orders)) {
+                final StringJoiner stringJoiner = new StringJoiner(", ");
+                for (Order order : this.orders) {
+                    stringJoiner.add(order.getOrderBy().concat(" ").concat(order.getSorter().toString()));
+                }
 
-            return stringJoiner.toString();
-        }
+                return stringJoiner.toString();
+            }
         return null;
     }
 
