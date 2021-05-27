@@ -1,5 +1,8 @@
 package kd.alm.orm.util;
 
+import kd.alm.orm.page.Page;
+import kd.alm.orm.page.PageRequest;
+import kd.bos.algo.DataSet;
 import kd.bos.cache.CacheFactory;
 import kd.bos.cache.DistributeSessionlessCache;
 import kd.bos.dataentity.entity.DynamicObject;
@@ -10,12 +13,12 @@ import kd.bos.entity.EntityMetadataCache;
 import kd.bos.entity.property.EntryProp;
 import kd.bos.entity.property.LinkEntryProp;
 import kd.bos.id.ID;
+import kd.bos.orm.ORM;
 import kd.bos.orm.query.QFilter;
+import kd.bos.orm.query.WithEntityEntryDistinctable;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 /**
@@ -34,109 +37,109 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
     private static final DistributeSessionlessCache cache = CacheFactory.getCommonCacheFactory().getDistributeSessionlessCache();
 
 
-//    /**
-//     * 分页和排序查询
-//     *
-//     * @param entityName  标识名
-//     * @param filters     过滤条件
-//     * @param pageRequest 分页
-//     * @return 分页的查询内容
-//     */
-//    public static Page doPageAndSortFromCache(String entityName, QFilter[] filters, PageRequest pageRequest) {
-//
-//        return doPageAndSortFromCache(entityName, filters, null, pageRequest);
-//    }
-//
-//    /**
-//     * 分页和排序查询
-//     *
-//     * @param entityName       标识名
-//     * @param filters          过滤条件
-//     * @param selectProperties 字段
-//     * @param pageRequest      分页
-//     * @return 分页的查询内容
-//     */
-//    public static Page doPageAndSortFromCache(String entityName, QFilter[] filters, String selectProperties, PageRequest pageRequest) {
-//        DataSet ds = ORM.create().queryDataSet("AlmBusinessDataServiceHelper.doPageAndSortFromCache", entityName, "id", filters, pageRequest.getOrderBys(), -1, WithEntityEntryDistinctable.get());
-//        // 主键列表
-//        List<Long> idList = new ArrayList<>();
-//        ds.forEach((row) -> {
-//            idList.add(row.getLong(0));
-//        });
-//        // 关闭DataSet
-//        ds.close();
-//        return doPageFromCache(idList, entityName, selectProperties, pageRequest);
-//    }
-//
-//    /**
-//     * 分页
-//     *
-//     * @param pkList      主键ID列表
-//     * @param entityName  标识名
-//     * @param pageRequest 分页
-//     * @return 分页的查询内容
-//     */
-//    public static Page doPageFromCache(List<Long> pkList, String entityName, PageRequest pageRequest) {
-//        return doPageFromCache(pkList, entityName, null, pageRequest);
-//    }
-//
-//    /**
-//     * 分页
-//     *
-//     * @param pkList           主键ID列表
-//     * @param entityName       标识名
-//     * @param selectProperties 字段
-//     * @param pageRequest      分页
-//     * @return 分页的查询内容
-//     */
-//    public static Page<DynamicObject> doPageFromCache(List<Long> pkList, String entityName, String selectProperties, PageRequest pageRequest) {
-//        DynamicObjectType type;
-//        if (selectProperties == null) {
-//            type = EntityMetadataCache.getDataEntityType(entityName);
-//        } else {
-//            type = getSubEntityType(entityName, selectProperties);
-//        }
-//        // 计算查询的个数
-//        int total = pkList.size();
-//
-//        // 计算总页数
-//        double totalPage = Math.ceil((double) total / pageRequest.getSize());
-//
-//        int nextPage;
-//        int pervPage;
-//        Map<Object, DynamicObject> resultMap = new HashMap<Object, DynamicObject>(16);
-//        if (pageRequest.getPage() > totalPage) {
-//            nextPage = -1;
-//            pervPage = -1;
-//        } else {
-//            int fromIndex = pageRequest.getPage() * pageRequest.getSize();
-//            int toIndex = fromIndex + pageRequest.getSize();
-//            if (toIndex > total) {
-//                toIndex = total;
-//            }
-//
-//            // 待查询的主键列表
-//            List<Long> pageIdList = pkList.subList(fromIndex, toIndex);
-//            // 获取分页结果
-//            resultMap = loadFromCache(pageIdList.toArray(), type);
-//            // 计算分页前/后页码
-//            nextPage = pageRequest.getPage() - 1;
-//            pervPage = pageRequest.getPage() + 1;
-//            if (pervPage == totalPage) {
-//                pervPage = -1;
-//            }
-//        }
-//        // 结果
-//        Page<DynamicObject> page = new Page<>();
-//        page.setNextPage(nextPage);
-//        page.setPervPage(pervPage);
-//        page.setSize(pageRequest.getSize());
-//        page.setPage(pageRequest.getPage());
-//        page.setTotalPage((int) totalPage);
-//        page.setTotalSize(total);
-//        page.setData(resultMap.values());
-//        return page;
-//    }
+    /**
+     * 分页和排序查询
+     *
+     * @param entityName  标识名
+     * @param filters     过滤条件
+     * @param pageRequest 分页
+     * @return 分页的查询内容
+     */
+    public static Page doPageAndSortFromCache(String entityName, QFilter[] filters, PageRequest pageRequest) {
+
+        return doPageAndSortFromCache(entityName, filters, null, pageRequest);
+    }
+
+    /**
+     * 分页和排序查询
+     *
+     * @param entityName       标识名
+     * @param filters          过滤条件
+     * @param selectProperties 字段
+     * @param pageRequest      分页
+     * @return 分页的查询内容
+     */
+    public static Page doPageAndSortFromCache(String entityName, QFilter[] filters, String selectProperties, PageRequest pageRequest) {
+        DataSet ds = ORM.create().queryDataSet("AlmBusinessDataServiceHelper.doPageAndSortFromCache", entityName, "id", filters, pageRequest.toOrderBys(), -1, WithEntityEntryDistinctable.get());
+        // 主键列表
+        List<Long> idList = new ArrayList<>();
+        ds.forEach((row) -> {
+            idList.add(row.getLong(0));
+        });
+        // 关闭DataSet
+        ds.close();
+        return doPageFromCache(idList, entityName, selectProperties, pageRequest);
+    }
+
+    /**
+     * 分页
+     *
+     * @param pkList      主键ID列表
+     * @param entityName  标识名
+     * @param pageRequest 分页
+     * @return 分页的查询内容
+     */
+    public static Page doPageFromCache(List<Long> pkList, String entityName, PageRequest pageRequest) {
+        return doPageFromCache(pkList, entityName, null, pageRequest);
+    }
+
+    /**
+     * 分页
+     *
+     * @param pkList           主键ID列表
+     * @param entityName       标识名
+     * @param selectProperties 字段
+     * @param pageRequest      分页
+     * @return 分页的查询内容
+     */
+    public static Page<DynamicObject> doPageFromCache(List<Long> pkList, String entityName, String selectProperties, PageRequest pageRequest) {
+        DynamicObjectType type;
+        if (selectProperties == null) {
+            type = EntityMetadataCache.getDataEntityType(entityName);
+        } else {
+            type = getSubEntityType(entityName, selectProperties);
+        }
+        // 计算查询的个数
+        int total = pkList.size();
+
+        // 计算总页数
+        double totalPage = Math.ceil((double) total / pageRequest.getSize());
+
+        int nextPage;
+        int pervPage;
+        Map<Object, DynamicObject> resultMap = new HashMap<Object, DynamicObject>(16);
+        if (pageRequest.getPage() > totalPage) {
+            nextPage = -1;
+            pervPage = -1;
+        } else {
+            int fromIndex = pageRequest.getPage() * pageRequest.getSize();
+            int toIndex = fromIndex + pageRequest.getSize();
+            if (toIndex > total) {
+                toIndex = total;
+            }
+
+            // 待查询的主键列表
+            List<Long> pageIdList = pkList.subList(fromIndex, toIndex);
+            // 获取分页结果
+            resultMap = loadFromCache(pageIdList.toArray(), type);
+            // 计算分页前/后页码
+            nextPage = pageRequest.getPage() - 1;
+            pervPage = pageRequest.getPage() + 1;
+            if (pervPage == totalPage) {
+                pervPage = -1;
+            }
+        }
+        // 结果
+        Page<DynamicObject> page = new Page<>();
+        page.setNextPage(nextPage);
+        page.setPervPage(pervPage);
+        page.setSize(pageRequest.getSize());
+        page.setPage(pageRequest.getPage());
+        page.setTotalPage((int) totalPage);
+        page.setTotalSize(total);
+        page.setData(new ArrayList<>(resultMap.values()));
+        return page;
+    }
 
     /**
      * 字段
