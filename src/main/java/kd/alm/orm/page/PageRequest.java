@@ -29,6 +29,7 @@ public class PageRequest implements Serializable {
      */
     private int page = 0;
 
+    @Deprecated
     private String orderBys;
 
     /**
