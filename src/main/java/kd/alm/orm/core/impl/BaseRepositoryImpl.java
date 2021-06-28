@@ -11,6 +11,7 @@ import kd.alm.orm.exception.OrmRuntimeException;
 import kd.alm.orm.page.Page;
 import kd.alm.orm.page.PageRequest;
 import kd.alm.orm.util.AlmBusinessDataServiceHelper;
+import kd.alm.orm.util.AlmOperationServiceUtils;
 import kd.alm.orm.util.AlmSaveServiceHelper;
 import kd.alm.orm.util.ReflectionUtils;
 import kd.bos.dataentity.OperateOption;
@@ -529,7 +530,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
         final DynamicObject[] dynamicObjects = this.mapDynamicObject(list);
         final Entity entity = ReflectionUtils.getAnnotationEntity(this.entityClass);
         String entityName = entity.value();
-        return AlmSaveServiceHelper.saveOperate(entityName, dynamicObjects, OperateOption.create());
+        return AlmOperationServiceUtils.saveOperate(entityName, dynamicObjects, OperateOption.create());
     }
 
     @Override
