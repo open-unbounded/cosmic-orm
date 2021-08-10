@@ -20,6 +20,7 @@ import kd.bos.servicehelper.BusinessDataServiceHelper;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * </p>
@@ -206,6 +207,29 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
         });
     }
 
+    private static Optional<DynamicObject[]> loadOptional(Supplier<Optional<DynamicObject[]>> handle) {
+        try {
+            return handle.get();
+        } catch (RuntimeException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * 查询多条DynamicObject
+     * @param entityName 表单标识
+     * @param filters
+     * @return
+     */
+    public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter[] filters) {
+        return loadOptional(() -> {
+            DynamicObject typeEntity = BusinessDataServiceHelper.newDynamicObject(entityName);
+            final DynamicObject[] dynamicObjectCollection = load(entityName, "id", filters);
+            List<Object> pks = Arrays.stream(dynamicObjectCollection).map(e -> e.get("id")).collect(Collectors.toList());
+            DynamicObject[] list = BusinessDataServiceHelper.load(pks.toArray(), typeEntity.getDynamicObjectType());
+            return Optional.of(list);
+        });
+    }
 
     /**
      * 获取单据体DynamicObjectType
