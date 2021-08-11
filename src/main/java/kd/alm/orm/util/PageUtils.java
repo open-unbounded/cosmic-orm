@@ -27,6 +27,12 @@ public class PageUtils {
     public static <T> Page<T> genPage(int total, PageRequest pageRequest, Class<T> clzz) {
 
 
+        //page = -2，不分页
+        if (pageRequest.getPage() == -2){
+            pageRequest.setSize(total);
+            pageRequest.setPage(1);
+        }
+
         // 计算总页数
         double totalPage = Math.ceil((double) total / pageRequest.getSize());
         // 下一页
