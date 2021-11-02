@@ -52,51 +52,13 @@ import java.util.stream.Collectors;
 public class BaseRepositoryImpl<T> implements BaseRepository<T> {
     private static final Log log = LogFactory.getLog(BaseRepositoryImpl.class);
     private final Class<T> entityClass;
-    private final Map<String, IDataEntityProperty> properties = new HashMap<>();
+    private final Entity annotationEntity;
 
     {
         this.entityClass = getGenericType(this.getClass());
         ReflectionUtils.checkEntity(this.entityClass);
-        final Entity annotationEntity = ReflectionUtils.getAnnotationEntity(this.entityClass);
-        // 获取当前数据实体属性
-        final DynamicObject dynamicObject = AlmBusinessDataServiceHelper.newDynamicObject(annotationEntity.value());
-        final Map<String, IDataEntityProperty> collect = dynamicObject.getDynamicObjectType().getProperties().stream().collect(Collectors.toMap(IMetadata::getName, it -> it));
-        this.properties.putAll(collect);
-        // 单据体
-        final Map<String, IDataEntityProperty> entryCollect = new HashMap<>();
-        for (IDataEntityProperty property : this.properties.values()) {
-            if (!(property instanceof LinkEntryProp) && property instanceof EntryProp) {
-                final Map<String, IDataEntityProperty> map = dynamicObject.getDynamicObjectCollection(property.getName())
-                        .getDynamicObjectType().getProperties().stream().collect(Collectors.toMap(IMetadata::getName, it -> it));
-                entryCollect.putAll(map);
-            }
-        }
-        this.properties.putAll(entryCollect);
-    }
+        this.annotationEntity = ReflectionUtils.getAnnotationEntity(this.entityClass);
 
-
-    /**
-     * 获取泛型类型
-     *
-     * @param c 包含泛型的Class类型
-     * @return 泛型Class
-     */
-    private Class<T> getGenericType(Class<?> c) {
-        Type genType = c.getGenericSuperclass();
-        if (!(genType instanceof ParameterizedType)) {
-            return (Class<T>) Object.class;
-        } else {
-            Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
-            if (0 < params.length) {
-                if (!(params[0] instanceof Class)) {
-                    return (Class<T>) Object.class;
-                } else {
-                    return (Class<T>) params[0];
-                }
-            } else {
-                return (Class<T>) Object.class;
-            }
-        }
     }
 
     /**
@@ -199,7 +161,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
                         String id = (String) ReflectionUtils.getValue(o, primaryKeyField);
                         // 存在则直接使用,不存在则新增
                         DynamicObject entryDo = dynamicObjectMap.get(id);
-                        if(entryDo == null){
+                        if (entryDo == null) {
                             entryDo = dynamicObjectCollection.addNew();
                         }
                         // 映射对象
@@ -210,6 +172,54 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
             }
         }
 
+    }
+
+    /**
+     * 获取泛型类型
+     *
+     * @param c 包含泛型的Class类型
+     * @return 泛型Class
+     */
+    private Class<T> getGenericType(Class<?> c) {
+        Type genType = c.getGenericSuperclass();
+        if (!(genType instanceof ParameterizedType)) {
+            return (Class<T>) Object.class;
+        } else {
+            Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
+            if (0 < params.length) {
+                if (!(params[0] instanceof Class)) {
+                    return (Class<T>) Object.class;
+                } else {
+                    return (Class<T>) params[0];
+                }
+            } else {
+                return (Class<T>) Object.class;
+            }
+        }
+    }
+
+    /**
+     * 动态获取属性
+     *
+     * @return 属性
+     */
+    private Map<String, IDataEntityProperty> getProperties() {
+        // 获取当前数据实体属性
+        final DynamicObject dynamicObject = AlmBusinessDataServiceHelper.newDynamicObject(this.annotationEntity.value());
+        final Map<String, IDataEntityProperty> properties = dynamicObject.getDynamicObjectType().getProperties().stream().collect(Collectors.toMap(IMetadata::getName, it -> it));
+
+
+        // 单据体
+        final Map<String, IDataEntityProperty> entryCollect = new HashMap<>();
+        for (IDataEntityProperty property : properties.values()) {
+            if (!(property instanceof LinkEntryProp) && property instanceof EntryProp) {
+                final Map<String, IDataEntityProperty> map = dynamicObject.getDynamicObjectCollection(property.getName())
+                        .getDynamicObjectType().getProperties().stream().collect(Collectors.toMap(IMetadata::getName, it -> it));
+                entryCollect.putAll(map);
+            }
+        }
+        properties.putAll(entryCollect);
+        return properties;
     }
 
     /**
@@ -257,7 +267,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
             if (fieldNameOptional.isPresent()) {
                 final String formFieldName = fieldNameOptional.get().split("\\.")[0];
                 // 获得字段属性
-                final IDataEntityProperty iDataEntityProperty = properties.get(formFieldName);
+                final IDataEntityProperty iDataEntityProperty = this.getProperties().get(formFieldName);
                 if (iDataEntityProperty == null) {
                     throw new OrmRuntimeException("苍穹中不存在此字段");
                 }
