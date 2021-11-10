@@ -86,7 +86,6 @@ public class AlmDB {
                     try {
                         String field = k.toLowerCase();
                         Object object = resultSet.getObject(field);
-                        System.out.println(object);
                         String name = formatFieldName(field);
                         Method method = methodHashMap.get(name);
                         if (object instanceof Long && field.endsWith("id")) {
