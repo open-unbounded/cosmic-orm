@@ -51,7 +51,7 @@ public class PageRequest implements Serializable {
             if (CollectionUtils.isNotEmpty(this.orders)) {
                 final StringJoiner stringJoiner = new StringJoiner(", ");
                 for (Order order : this.orders) {
-                    stringJoiner.add(order.getOrderBy().concat(" ").concat(order.getSorter().toString()));
+                    stringJoiner.add(order.getOrderBy().concat(" ").concat(order.getSorter().name()));
                 }
 
                 return stringJoiner.toString();
