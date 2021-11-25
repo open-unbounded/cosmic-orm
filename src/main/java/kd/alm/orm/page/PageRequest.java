@@ -68,7 +68,7 @@ public class PageRequest implements Serializable {
         if (CollectionUtils.isNotEmpty(this.orders)) {
             final String[] orderByArray = new String[this.orders.size()];
             for (int i = 0; i < this.orders.size(); i++) {
-                orderByArray[i] = this.orders.get(i).getOrderBy().concat(" ").concat(this.orders.get(i).getSorter().toString());
+                orderByArray[i] = this.orders.get(i).getOrderBy().concat(" ").concat(this.orders.get(i).getSorter().name());
             }
             return orderByArray;
         }
