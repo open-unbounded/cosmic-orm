@@ -227,7 +227,12 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
             final DynamicObject[] dynamicObjectCollection = load(entityName, "id", filters);
             List<Object> pks = Arrays.stream(dynamicObjectCollection).map(e -> e.get("id")).collect(Collectors.toList());
             DynamicObject[] list = BusinessDataServiceHelper.load(pks.toArray(), typeEntity.getDynamicObjectType());
-            return Optional.of(list);
+
+            if (list.length > 0){
+                return Optional.of(list);
+            } else {
+                return Optional.empty();
+            }
         });
     }
 
