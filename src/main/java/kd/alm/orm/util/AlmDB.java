@@ -1,6 +1,7 @@
 package kd.alm.orm.util;
 
 import com.google.common.collect.Sets;
+import kd.alm.orm.exception.OrmRuntimeException;
 import kd.alm.orm.page.Page;
 import kd.alm.orm.page.PageRequest;
 import kd.bos.algo.DataSet;
@@ -88,14 +89,23 @@ public class AlmDB {
                         Object object = resultSet.getObject(field);
                         String name = formatFieldName(field);
                         Method method = methodHashMap.get(name);
-                        if (object instanceof Long && field.endsWith("id")) {
-                            object = ConvertUtils.convert(object, String.class);
-                        }
+
                         if (method != null) {
-                            method.invoke(t, object);
+                            try {
+                                method.invoke(t, object);
+                            } catch (InvocationTargetException e) {
+                                // 保留原有逻辑，以适配旧代码
+                                // ------------------------------------------------------------------------------
+                                if (object instanceof Long && field.endsWith("id")) {
+                                    object = ConvertUtils.convert(object, String.class);
+                                }
+                                method.invoke(t, object);
+                                // ------------------------------------------------------------------------------
+
+                            }
                         }
-                    } catch (SQLException | IllegalAccessException | InvocationTargetException throwables) {
-                        throwables.printStackTrace();
+                    } catch (SQLException | IllegalAccessException | InvocationTargetException e) {
+                        log.error(e);
                     }
 
                 });
@@ -103,7 +113,7 @@ public class AlmDB {
             }
             return rs;
         } catch (InstantiationException | SQLException | IllegalAccessException | ClassNotFoundException e) {
-            e.printStackTrace();
+            log.error(e);
         }
         return rs;
     }
@@ -128,6 +138,7 @@ public class AlmDB {
      * @param <T>
      * @return 查询结果
      */
+    @Deprecated
     public static <T> List<T> query(DataSet dataSet, BiFunction<Row, T, T> rowHandle, Class<T> calzz) {
         ArrayList<T> rs = new ArrayList<>();
         if (dataSet == null || dataSet.isEmpty()) {
@@ -158,20 +169,30 @@ public class AlmDB {
                         Object object = data.get(field);
                         String name = formatFieldName(field);
                         Method method = methodHashMap.get(name);
-                        if (object instanceof Long && field.endsWith("id")) {
-                            object = ConvertUtils.convert(object, String.class);
-                        }
+
                         if (method != null) {
 
-                            if (object instanceof Integer) {
-                                object = ConvertUtils.convert(object, Long.class);
+                            try {
+                                method.invoke(t, object);
+                            } catch (InvocationTargetException e) {
+                                // 保留原有逻辑，以适配旧代码
+                                // ------------------------------------------------------------------------------
+                                if (object instanceof Long && field.endsWith("id")) {
+                                    object = ConvertUtils.convert(object, String.class);
+                                } else if (object instanceof Integer) {
+                                    object = ConvertUtils.convert(object, Long.class);
+                                }
+                                method.invoke(t, object);
+                                // ------------------------------------------------------------------------------
+
                             }
-                            method.invoke(t, object);
                         }
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        e.printStackTrace();
-                    } catch (IllegalArgumentException e) {
+                    } catch (InvocationTargetException e) {
+                        log.error(e);
                         throw new KDBizException(String.format("字段类型匹配错误!字段:%s  期待类型:%s", k, v));
+                    } catch (IllegalAccessException e) {
+                        log.error(e);
+                        throw new OrmRuntimeException(e.getMessage());
                     }
 
                 });
@@ -181,7 +202,8 @@ public class AlmDB {
 
             }
         } catch (IllegalAccessException | InstantiationException e) {
-            e.printStackTrace();
+            log.error(e);
+            throw new OrmRuntimeException(e.getMessage());
         }
         return rs;
     }
