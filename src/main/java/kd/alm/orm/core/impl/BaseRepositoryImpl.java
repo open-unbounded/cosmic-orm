@@ -53,6 +53,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
     private static final Log log = LogFactory.getLog(BaseRepositoryImpl.class);
     private final Class<T> entityClass;
     private final Entity annotationEntity;
+    private static final Long LONG_ZERO = 0L;
 
     {
         this.entityClass = getGenericType(this.getClass());
@@ -81,7 +82,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
 
             if (field.isAnnotationPresent(PrimaryKey.class)) {
                 // 主键
-                if ("0".equals(v)) {
+                if ("0".equals(v) || LONG_ZERO.equals(v)) {
                     // 创建ID
                     v = ID.genLongId();
                 }
@@ -242,7 +243,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
                 result.add(t);
             } catch (IllegalAccessException | InstantiationException e) {
                 log.error("mapObject error", e);
-                e.printStackTrace();
+                throw new OrmRuntimeException(e.getMessage());
             }
         }
         return result;
@@ -411,10 +412,17 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
             }
             if (o instanceof ILocaleString) {
                 o = ((ILocaleString) o).getLocaleValue();
-            } else if (o instanceof Long && field.getName().toLowerCase().endsWith("id")) {
+
+            }
+            //
+            // 保留原有逻辑，以适配旧代码
+            // ------------------------------------------------------------------------------
+            else if (o instanceof Long && field.getName().toLowerCase().endsWith("id") && field.getType().equals(String.class)) {
                 // ID字段
                 o = ConvertUtils.convert(o, String.class);
-            } else if (o instanceof DynamicObjectCollection && ReflectionUtils.isAnnotationPresent(field, Entry.class)) {
+            }
+            // ------------------------------------------------------------------------------
+            else if (o instanceof DynamicObjectCollection && ReflectionUtils.isAnnotationPresent(field, Entry.class)) {
                 // 单据体
                 // 泛型的Class
                 final Entry fieldAnnotation = field.getAnnotation(Entry.class);
