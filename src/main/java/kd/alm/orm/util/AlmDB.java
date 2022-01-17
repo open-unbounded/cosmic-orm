@@ -93,7 +93,7 @@ public class AlmDB {
                         if (method != null) {
                             try {
                                 method.invoke(t, object);
-                            } catch (InvocationTargetException e) {
+                            } catch (IllegalArgumentException e) {
                                 // 保留原有逻辑，以适配旧代码
                                 // ------------------------------------------------------------------------------
                                 if (object instanceof Long && field.endsWith("id")) {
@@ -174,7 +174,7 @@ public class AlmDB {
 
                             try {
                                 method.invoke(t, object);
-                            } catch (InvocationTargetException e) {
+                            } catch (IllegalArgumentException e) {
                                 // 保留原有逻辑，以适配旧代码
                                 // ------------------------------------------------------------------------------
                                 if (object instanceof Long && field.endsWith("id")) {
@@ -187,10 +187,10 @@ public class AlmDB {
 
                             }
                         }
-                    } catch (InvocationTargetException e) {
+                    } catch (IllegalArgumentException e) {
                         log.error(e);
                         throw new KDBizException(String.format("字段类型匹配错误!字段:%s  期待类型:%s", k, v));
-                    } catch (IllegalAccessException e) {
+                    } catch (IllegalAccessException | InvocationTargetException e) {
                         log.error(e);
                         throw new OrmRuntimeException(e.getMessage());
                     }
