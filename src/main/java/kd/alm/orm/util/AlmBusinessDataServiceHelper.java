@@ -12,6 +12,8 @@ import kd.bos.dataentity.metadata.dynamicobject.DynamicObjectType;
 import kd.bos.entity.EntityMetadataCache;
 import kd.bos.entity.property.EntryProp;
 import kd.bos.entity.property.LinkEntryProp;
+import kd.bos.exception.ErrorCode;
+import kd.bos.exception.KDException;
 import kd.bos.id.ID;
 import kd.bos.orm.ORM;
 import kd.bos.orm.query.QFilter;
@@ -165,7 +167,6 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @return Optional<DynamicObject>
      */
     public static Optional<DynamicObject> loadSingleOptional(Object pk, String entityName) {
-
         return loadSingleOptional(() -> {
             final DynamicObject dynamicObject = loadSingle(pk, entityName);
             return Optional.of(dynamicObject);
@@ -188,12 +189,29 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
 
 
     private static Optional<DynamicObject> loadSingleOptional(Supplier<Optional<DynamicObject>> handle) {
+
         try {
             return handle.get();
         } catch (RuntimeException e) {
-            return Optional.empty();
+            Throwable cause = e;
+            while (cause != null) {
+                if (cause instanceof KDException) {
+                    final ErrorCode errorCode = ((KDException) cause).getErrorCode();
+                    if (errorCode != null && "bos.orm.read.dataNotExist".equals(errorCode.getCode())) {
+                        return Optional.empty();
+                    }
+                }
+                if (cause.getCause() != cause) {
+                    cause = cause.getCause();
+                }
+            }
+
+            throw e;
         }
+
+
     }
+
 
     /**
      * @param entityName 表单标识
@@ -201,39 +219,32 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @return
      */
     public static Optional<DynamicObject> loadSingleOptional(String entityName, QFilter[] filters) {
-        return loadSingleOptional(() -> {
-            final DynamicObject dynamicObject = loadSingle(entityName, "id", filters);
-            return loadSingleOptional(dynamicObject.getPkValue(), entityName);
-        });
-    }
-
-    private static Optional<DynamicObject[]> loadOptional(Supplier<Optional<DynamicObject[]>> handle) {
-        try {
-            return handle.get();
-        } catch (RuntimeException e) {
+        final DynamicObject dynamicObject = loadSingle(entityName, "id", filters);
+        if (dynamicObject == null) {
             return Optional.empty();
         }
+        return loadSingleOptional(() -> loadSingleOptional(dynamicObject.getPkValue(), entityName));
     }
+
 
     /**
      * 查询多条DynamicObject
+     *
      * @param entityName 表单标识
      * @param filters
      * @return
      */
     public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter[] filters) {
-        return loadOptional(() -> {
-            DynamicObject typeEntity = BusinessDataServiceHelper.newDynamicObject(entityName);
-            final DynamicObject[] dynamicObjectCollection = load(entityName, "id", filters);
-            List<Object> pks = Arrays.stream(dynamicObjectCollection).map(e -> e.get("id")).collect(Collectors.toList());
-            DynamicObject[] list = BusinessDataServiceHelper.load(pks.toArray(), typeEntity.getDynamicObjectType());
+        DynamicObject typeEntity = BusinessDataServiceHelper.newDynamicObject(entityName);
+        final DynamicObject[] dynamicObjectCollection = load(entityName, "id", filters);
+        List<Object> pks = Arrays.stream(dynamicObjectCollection).map(e -> e.get("id")).collect(Collectors.toList());
+        DynamicObject[] list = BusinessDataServiceHelper.load(pks.toArray(), typeEntity.getDynamicObjectType());
 
-            if (list.length > 0){
-                return Optional.of(list);
-            } else {
-                return Optional.empty();
-            }
-        });
+        if (list.length > 0) {
+            return Optional.of(list);
+        } else {
+            return Optional.empty();
+        }
     }
 
     /**
