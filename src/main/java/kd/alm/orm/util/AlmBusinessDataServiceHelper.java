@@ -22,7 +22,6 @@ import kd.bos.servicehelper.BusinessDataServiceHelper;
 
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  * </p>
@@ -235,16 +234,17 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @return
      */
     public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter[] filters) {
-        DynamicObject typeEntity = BusinessDataServiceHelper.newDynamicObject(entityName);
+
         final DynamicObject[] dynamicObjectCollection = load(entityName, "id", filters);
-        List<Object> pks = Arrays.stream(dynamicObjectCollection).map(e -> e.get("id")).collect(Collectors.toList());
-        DynamicObject[] list = BusinessDataServiceHelper.load(pks.toArray(), typeEntity.getDynamicObjectType());
+        Object[] pks = Arrays.stream(dynamicObjectCollection).map(e -> e.get("id")).toArray();
+
+        DynamicObjectType type = EntityMetadataCache.getDataEntityType(entityName);
+        DynamicObject[] list = BusinessDataServiceHelper.load(pks, type);
 
         if (list.length > 0) {
             return Optional.of(list);
-        } else {
-            return Optional.empty();
         }
+        return Optional.empty();
     }
 
     /**
