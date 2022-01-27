@@ -166,6 +166,10 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @return Optional<DynamicObject>
      */
     public static Optional<DynamicObject> loadSingleOptional(Object pk, String entityName) {
+        if (pk == null) {
+            return Optional.empty();
+        }
+
         return loadSingleOptional(() -> {
             final DynamicObject dynamicObject = loadSingle(pk, entityName);
             return Optional.of(dynamicObject);
@@ -180,6 +184,10 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @return Optional<DynamicObject>
      */
     public static Optional<DynamicObject> loadSingleOptional(Object pk, DynamicObjectType type) {
+        if (pk == null) {
+            return Optional.empty();
+        }
+
         return loadSingleOptional(() -> {
             final DynamicObject dynamicObject = loadSingle(pk, type);
             return Optional.of(dynamicObject);
