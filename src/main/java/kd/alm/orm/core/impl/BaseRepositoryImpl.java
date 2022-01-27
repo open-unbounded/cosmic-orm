@@ -548,7 +548,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
         final DynamicObject[] dynamicObjects = this.mapDynamicObject(list);
         final Entity entity = ReflectionUtils.getAnnotationEntity(this.entityClass);
         String entityName = entity.value();
-        return AlmOperationServiceUtils.saveOperate(entityName, dynamicObjects, OperateOption.create());
+        return AlmOperationServiceUtils.saveOperate(entityName, dynamicObjects, option == null ? OperateOption.create() : option);
     }
 
     @Override
