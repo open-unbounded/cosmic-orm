@@ -138,7 +138,6 @@ public class AlmDB {
      * @param <T>
      * @return 查询结果
      */
-    @Deprecated
     public static <T> List<T> query(DataSet dataSet, BiFunction<Row, T, T> rowHandle, Class<T> calzz) {
         ArrayList<T> rs = new ArrayList<>();
         if (dataSet == null || dataSet.isEmpty()) {
