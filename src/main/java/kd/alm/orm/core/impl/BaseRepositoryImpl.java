@@ -471,10 +471,12 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
                                 ((Iterable<?>) o).forEach(ids::add);
                                 qFilters.add(new QFilter(formFiledName, QCP.in, ids));
                             } else {
-                                qFilters.add(new QFilter(formFiledName, QCP.equals, o));
                                 if (ReflectionUtils.isAnnotationPresent(field, PrimaryKey.class)) {
+                                    qFilters.add(new QFilter(formFiledName, QCP.equals, ConvertUtils.convert(o, Long.class)));
                                     // 主键确定时,直接跳出
                                     break;
+                                } else {
+                                    qFilters.add(new QFilter(formFiledName, QCP.equals, o));
                                 }
                             }
                         }
