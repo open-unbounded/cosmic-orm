@@ -244,17 +244,7 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @return
      */
     public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter[] filters) {
-
-        final DynamicObject[] dynamicObjectCollection = load(entityName, "id", filters);
-        Object[] pks = Arrays.stream(dynamicObjectCollection).map(e -> e.get("id")).toArray();
-
-        DynamicObjectType type = EntityMetadataCache.getDataEntityType(entityName);
-        DynamicObject[] list = BusinessDataServiceHelper.load(pks, type);
-
-        if (list.length > 0) {
-            return Optional.of(list);
-        }
-        return Optional.empty();
+        return loadOptional(entityName, filters, null);
     }
 
     /**
