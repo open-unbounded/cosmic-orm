@@ -5,10 +5,12 @@ import kd.alm.orm.page.PageRequest;
 import kd.bos.algo.DataSet;
 import kd.bos.cache.CacheFactory;
 import kd.bos.cache.DistributeSessionlessCache;
+import kd.bos.data.BusinessDataReader;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.entity.DynamicObjectCollection;
 import kd.bos.dataentity.metadata.IDataEntityProperty;
 import kd.bos.dataentity.metadata.dynamicobject.DynamicObjectType;
+import kd.bos.dataentity.utils.StringUtils;
 import kd.bos.entity.EntityMetadataCache;
 import kd.bos.entity.property.EntryProp;
 import kd.bos.entity.property.LinkEntryProp;
@@ -242,17 +244,54 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @return
      */
     public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter[] filters) {
+        return loadOptional(entityName, filters, null);
+    }
 
-        final DynamicObject[] dynamicObjectCollection = load(entityName, "id", filters);
+    /**
+     * 查询多条DynamicObject
+     * @param entityName 表单标识
+     * @param filters 过滤条件
+     * @param orderBy 排序条件
+     * @return
+     */
+    public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter[] filters, String orderBy) {
+
+        final DynamicObject[] dynamicObjectCollection = AlmBusinessDataServiceHelper.load(entityName, "id", filters, orderBy);
         Object[] pks = Arrays.stream(dynamicObjectCollection).map(e -> e.get("id")).toArray();
-
         DynamicObjectType type = EntityMetadataCache.getDataEntityType(entityName);
-        DynamicObject[] list = BusinessDataServiceHelper.load(pks, type);
+
+        List<Object> ids = new ArrayList<>();
+        Collections.addAll(ids, pks);
+        DynamicObject[] objs = BusinessDataReader.load(ids.toArray(), type, Boolean.TRUE);
+
+        DynamicObject[] list = orderBy(objs, ids, orderBy);
 
         if (list.length > 0) {
             return Optional.of(list);
         }
         return Optional.empty();
+    }
+
+    private static DynamicObject[] orderBy(DynamicObject[] dynamicObjects, List<Object> idList, String orderBy) {
+        if (!StringUtils.isBlank(orderBy) && idList.size() > 1) {
+            Map<Object, DynamicObject> maps = new HashMap<>(dynamicObjects.length);
+
+            for (DynamicObject dynamicObject : dynamicObjects) {
+                maps.put(dynamicObject.getPkValue(), dynamicObject);
+            }
+
+            List<DynamicObject> listDyn = new ArrayList<>();
+
+            for (Object id : idList) {
+                if (maps.get(id) != null) {
+                    listDyn.add(maps.get(id));
+                }
+            }
+
+            return listDyn.toArray(new DynamicObject[0]);
+        } else {
+            return dynamicObjects;
+        }
     }
 
     /**
