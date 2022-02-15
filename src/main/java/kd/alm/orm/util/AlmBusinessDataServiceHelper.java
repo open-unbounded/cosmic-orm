@@ -281,32 +281,25 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
         return Optional.empty();
     }
 
-    private static DynamicObject[] orderBy(DynamicObject[] objs, List<Object> idList, String orderBy) {
+    private static DynamicObject[] orderBy(DynamicObject[] dynamicObjects, List<Object> idList, String orderBy) {
         if (!kd.bos.dataentity.utils.StringUtils.isBlank(orderBy) && idList.size() > 1) {
-            Map<Object, DynamicObject> maps = new HashMap(objs.length);
-            DynamicObject[] var4 = objs;
-            int var5 = objs.length;
+            Map<Object, DynamicObject> maps = new HashMap<>();
 
-            DynamicObject o;
-            for(int var6 = 0; var6 < var5; ++var6) {
-                o = var4[var6];
-                maps.put(o.getPkValue(), o);
+            for (DynamicObject dynamicObject : dynamicObjects) {
+                maps.put(dynamicObject.getPkValue(), dynamicObject);
             }
 
-            List<DynamicObject> listDyn = new ArrayList(objs.length);
-            Iterator var9 = idList.iterator();
+            List<DynamicObject> listDyn = new ArrayList<>();
 
-            while(var9.hasNext()) {
-                Object id = var9.next();
-                o = (DynamicObject)maps.get(id);
-                if (o != null) {
-                    listDyn.add(o);
+            for (Object id : idList) {
+                if (maps.get(id) != null) {
+                    listDyn.add(maps.get(id));
                 }
             }
 
-            return (DynamicObject[])listDyn.toArray(new DynamicObject[listDyn.size()]);
+            return listDyn.toArray(new DynamicObject[0]);
         } else {
-            return objs;
+            return dynamicObjects;
         }
     }
 
