@@ -5,6 +5,7 @@ import kd.alm.orm.page.PageRequest;
 import kd.bos.algo.DataSet;
 import kd.bos.cache.CacheFactory;
 import kd.bos.cache.DistributeSessionlessCache;
+import kd.bos.data.BusinessDataReader;
 import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.entity.DynamicObjectCollection;
 import kd.bos.dataentity.metadata.IDataEntityProperty;
@@ -253,6 +254,60 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
             return Optional.of(list);
         }
         return Optional.empty();
+    }
+
+    /**
+     * 查询多条DynamicObject
+     * @param entityName 表单标识
+     * @param filters 过滤条件
+     * @param orderBy 排序条件
+     * @return
+     */
+    public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter[] filters, String orderBy) {
+
+        final DynamicObject[] dynamicObjectCollection = AlmBusinessDataServiceHelper.load(entityName, "id", filters, orderBy);
+        Object[] pks = Arrays.stream(dynamicObjectCollection).map(e -> e.get("id")).toArray();
+        DynamicObjectType type = EntityMetadataCache.getDataEntityType(entityName);
+
+        List<Object> ids = new ArrayList<>();
+        Collections.addAll(ids, pks);
+        DynamicObject[] objs = BusinessDataReader.load(ids.toArray(), type, Boolean.TRUE);
+
+        DynamicObject[] list = orderBy(objs, ids, orderBy);
+
+        if (list.length > 0) {
+            return Optional.of(list);
+        }
+        return Optional.empty();
+    }
+
+    private static DynamicObject[] orderBy(DynamicObject[] objs, List<Object> idList, String orderBy) {
+        if (!kd.bos.dataentity.utils.StringUtils.isBlank(orderBy) && idList.size() > 1) {
+            Map<Object, DynamicObject> maps = new HashMap(objs.length);
+            DynamicObject[] var4 = objs;
+            int var5 = objs.length;
+
+            DynamicObject o;
+            for(int var6 = 0; var6 < var5; ++var6) {
+                o = var4[var6];
+                maps.put(o.getPkValue(), o);
+            }
+
+            List<DynamicObject> listDyn = new ArrayList(objs.length);
+            Iterator var9 = idList.iterator();
+
+            while(var9.hasNext()) {
+                Object id = var9.next();
+                o = (DynamicObject)maps.get(id);
+                if (o != null) {
+                    listDyn.add(o);
+                }
+            }
+
+            return (DynamicObject[])listDyn.toArray(new DynamicObject[listDyn.size()]);
+        } else {
+            return objs;
+        }
     }
 
     /**
