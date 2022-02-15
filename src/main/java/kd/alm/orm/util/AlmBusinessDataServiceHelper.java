@@ -10,6 +10,7 @@ import kd.bos.dataentity.entity.DynamicObject;
 import kd.bos.dataentity.entity.DynamicObjectCollection;
 import kd.bos.dataentity.metadata.IDataEntityProperty;
 import kd.bos.dataentity.metadata.dynamicobject.DynamicObjectType;
+import kd.bos.dataentity.utils.StringUtils;
 import kd.bos.entity.EntityMetadataCache;
 import kd.bos.entity.property.EntryProp;
 import kd.bos.entity.property.LinkEntryProp;
@@ -282,8 +283,8 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
     }
 
     private static DynamicObject[] orderBy(DynamicObject[] dynamicObjects, List<Object> idList, String orderBy) {
-        if (!kd.bos.dataentity.utils.StringUtils.isBlank(orderBy) && idList.size() > 1) {
-            Map<Object, DynamicObject> maps = new HashMap<>();
+        if (!StringUtils.isBlank(orderBy) && idList.size() > 1) {
+            Map<Object, DynamicObject> maps = new HashMap<>(dynamicObjects.length);
 
             for (DynamicObject dynamicObject : dynamicObjects) {
                 maps.put(dynamicObject.getPkValue(), dynamicObject);
