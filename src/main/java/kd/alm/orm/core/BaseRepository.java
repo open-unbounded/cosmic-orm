@@ -157,6 +157,27 @@ public interface BaseRepository<T> {
     <R> List<R> select(List<QFilter> qFilters, Class<R> resultClass);
 
     /**
+     * 查询列表
+     *
+     * @param qFilters    条件
+     * @param resultClass 结果类类型
+     * @param order       排序
+     * @return 结果数据
+     */
+    <R> List<R> select(List<QFilter> qFilters, Class<R> resultClass, String order);
+
+    /**
+     * 查询列表
+     *
+     * @param qFilters    条件
+     * @param resultClass 结果类类型
+     * @param order       排序
+     * @param top         前top条数据
+     * @return 结果数据
+     */
+    <R> List<R> select(List<QFilter> qFilters, Class<R> resultClass, String order, int top);
+
+    /**
      * 生成查询条件
      * NOTE:生成的查询条件字段之间是AND关系
      *
