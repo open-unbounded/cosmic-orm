@@ -705,12 +705,22 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
 
     @Override
     public <R> List<R> select(List<QFilter> qFilters, Class<R> resultClass) {
+        return this.select(qFilters, resultClass, null);
+    }
+
+    @Override
+    public <R> List<R> select(List<QFilter> qFilters, Class<R> resultClass, String order) {
+        return this.select(qFilters, resultClass, order, -1);
+    }
+
+    @Override
+    public <R> List<R> select(List<QFilter> qFilters, Class<R> resultClass, String order, int top) {
         ReflectionUtils.checkEntity(resultClass);
         final Field[] allField = ReflectionUtils.getAllField(resultClass);
         final List<String> selectFields = getSelectFields(allField);
 
         final String entityName = ReflectionUtils.getAnnotationEntity(resultClass).value();
-        final DynamicObject[] dynamicObjects = AlmBusinessDataServiceHelper.load(entityName, String.join(",", selectFields), qFilters.toArray(new QFilter[0]));
+        final DynamicObject[] dynamicObjects = AlmBusinessDataServiceHelper.load(entityName, String.join(",", selectFields), qFilters.toArray(new QFilter[0]), order, top);
 
         return mapObject(resultClass, allField, dynamicObjects);
     }
