@@ -9,6 +9,7 @@ import kd.bos.orm.query.Distinctable;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
 import kd.bos.servicehelper.QueryServiceHelper;
+import org.apache.commons.beanutils.ConvertUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -286,7 +287,7 @@ public class AlmQueryServiceHelper extends QueryServiceHelper {
             }
             DataSet ds = QueryServiceHelper.queryDataSet("AlmQueryServiceHelper.getMulBaseMapByAssetPage",
                     entityName,
-                    selectFields, new QFilter[]{new QFilter("id", QCP.in, ids)}, null);
+                    selectFields, new QFilter[]{new QFilter("id", QCP.in, ConvertUtils.convert(ids, Long[].class))}, null);
             if (resultDs == null) {
                 resultDs = ds;
             } else {
