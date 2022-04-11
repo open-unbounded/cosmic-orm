@@ -186,7 +186,7 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @return Optional<DynamicObject>
      */
     public static Optional<DynamicObject> loadSingleOptional(Object pk, DynamicObjectType type) {
-        if (pk == null) {
+        if (pk == null || "0".equals(pk.toString()) || StringUtils.isEmpty(pk.toString())) {
             return Optional.empty();
         }
 
