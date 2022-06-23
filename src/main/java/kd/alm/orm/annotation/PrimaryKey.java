@@ -19,4 +19,8 @@ public @interface PrimaryKey {
      * 描述
      */
     String description() default "";
+    /**
+     * 字段名称
+     */
+    String value() default "id";
 }

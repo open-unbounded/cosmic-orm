@@ -238,7 +238,7 @@ public class AlmDynamicUtils {
                     // 创建ID
                     v = ID.genLongId();
                 }
-                dynamicObject.set("id", v);
+                dynamicObject.set(field.getAnnotation(PrimaryKey.class).value(), v);
             } else if (field.isAnnotationPresent(kd.alm.orm.annotation.Field.class)) {
                 final DynamicProperty property = dynamicObjectType.getProperty(formFieldName);
                 if (property instanceof BasedataProp) {
@@ -306,10 +306,10 @@ public class AlmDynamicUtils {
                     }
 
                     // 删除不存在的数据
-                    dynamicObjectCollection.removeIf(next -> !keys.contains(next.getString("id")));
+                    dynamicObjectCollection.removeIf(next -> !keys.contains(next.getString(field.getAnnotation(PrimaryKey.class).value())));
                     // 建立映射关系
                     final Map<String/*主键*/, DynamicObject/*数据*/> dynamicObjectMap = dynamicObjectCollection.stream()
-                            .collect(Collectors.toMap(it -> it.getString("id"), it -> it));
+                            .collect(Collectors.toMap(it -> it.getString(field.getAnnotation(PrimaryKey.class).value()), it -> it));
                     for (Object o : entryList) {
                         String id = (String) ReflectionUtils.getValue(o, primaryKeyField);
                         // 存在则直接使用,不存在则新增
@@ -405,7 +405,7 @@ public class AlmDynamicUtils {
         }
         final Class<?> c = ReflectionUtils.getFieldGenericType(field);
         // 取出关联的基础资料
-        final DynamicObject[] dynamicObjects = ((DynamicObjectCollection) o).stream().map(it -> it.getDynamicObject("fbasedataid")).toArray(DynamicObject[]::new);
+        final DynamicObject[] dynamicObjects = ((DynamicObjectCollection) o).toArray(new DynamicObject[0]);
 
         // 返回一个List
         o = mapJavaObject(c, dynamicObjects);
