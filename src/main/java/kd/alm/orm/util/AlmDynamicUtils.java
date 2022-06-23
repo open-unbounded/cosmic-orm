@@ -166,7 +166,7 @@ public class AlmDynamicUtils {
                 if (fieldNameOptional.isPresent()) {
                     final String formFieldName = fieldNameOptional.get().split("\\.")[0];
                     // 获得字段属性
-                    final IDataEntityProperty iDataEntityProperty = getProperties(c).get(formFieldName);
+                    final IDataEntityProperty iDataEntityProperty = getProperties(dynamicObject).get(formFieldName);
                     if (iDataEntityProperty == null) {
                         throw new OrmRuntimeException("苍穹中不存在此字段");
                     }
@@ -333,12 +333,8 @@ public class AlmDynamicUtils {
      *
      * @return 属性
      */
-    private static <R> Map<String, IDataEntityProperty> getProperties(Class<R> c) {
-        // 获取当前数据实体属性
-        final DynamicObject dynamicObject = AlmBusinessDataServiceHelper.newDynamicObject(ReflectionUtils.getAnnotationEntity(c).value());
+    private static <R> Map<String, IDataEntityProperty> getProperties(DynamicObject dynamicObject) {
         final Map<String, IDataEntityProperty> properties = dynamicObject.getDynamicObjectType().getProperties().stream().collect(Collectors.toMap(IMetadata::getName, it -> it));
-
-
         // 单据体
         final Map<String, IDataEntityProperty> entryCollect = new HashMap<>();
         for (IDataEntityProperty property : properties.values()) {
