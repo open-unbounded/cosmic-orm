@@ -136,7 +136,7 @@ public class ReflectionUtils {
 
     public static Optional<String> getFormFieldNameOptional(Field field) {
         if (ReflectionUtils.isAnnotationPresent(field, PrimaryKey.class)) {
-            return Optional.of("id");
+            return Optional.of(field.getAnnotation(PrimaryKey.class).value());
         } else if (isAnnotationPresent(field, kd.alm.orm.annotation.Field.class)) {
             final String formFiledName = field.getAnnotation(kd.alm.orm.annotation.Field.class).value();
             if (StringUtils.isNotBlank(formFiledName)) {
