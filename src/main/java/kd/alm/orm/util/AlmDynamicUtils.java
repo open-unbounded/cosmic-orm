@@ -306,10 +306,10 @@ public class AlmDynamicUtils {
                     }
 
                     // 删除不存在的数据
-                    dynamicObjectCollection.removeIf(next -> !keys.contains(next.getString(field.getAnnotation(PrimaryKey.class).value())));
+                    dynamicObjectCollection.removeIf(next -> !keys.contains(next.getString(primaryKeyField.getAnnotation(PrimaryKey.class).value())));
                     // 建立映射关系
                     final Map<String/*主键*/, DynamicObject/*数据*/> dynamicObjectMap = dynamicObjectCollection.stream()
-                            .collect(Collectors.toMap(it -> it.getString(field.getAnnotation(PrimaryKey.class).value()), it -> it));
+                            .collect(Collectors.toMap(it -> it.getString(primaryKeyField.getAnnotation(PrimaryKey.class).value()), it -> it));
                     for (Object o : entryList) {
                         String id = (String) ReflectionUtils.getValue(o, primaryKeyField);
                         // 存在则直接使用,不存在则新增
