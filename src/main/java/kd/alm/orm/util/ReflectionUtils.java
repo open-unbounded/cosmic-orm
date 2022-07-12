@@ -162,6 +162,10 @@ public class ReflectionUtils {
                 // 非数据表字段则直接返回
                 return Optional.empty();
             }
+        } else if (isAnnotationPresent(field, Entry.class)) {
+            if (!field.getAnnotation(Entry.class).isDBField()) {
+                return Optional.empty();
+            }
         }
         final Optional<String> formFieldNameOptional = getFormFieldNameOptional(field);
         if (formFieldNameOptional.isPresent()) {

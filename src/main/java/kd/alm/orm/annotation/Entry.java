@@ -26,6 +26,11 @@ public @interface Entry {
     String description() default "";
 
     /**
+     * 是数据表字段
+     */
+    boolean isDBField() default true;
+
+    /**
      * 当前单据体数据映射的Class类型
      * 默认为{@code Void.class}时
      */
