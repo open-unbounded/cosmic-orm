@@ -299,9 +299,9 @@ public class AlmDynamicUtils {
                     Set<String> keys = new HashSet<>();
                     for (Object o : entryList) {
                         // 获取对应的主键
-                        String value = (String) ReflectionUtils.getValue(o, primaryKeyField);
+                        Object value = ReflectionUtils.getValue(o, primaryKeyField);
                         if (value != null) {
-                            keys.add(value);
+                            keys.add(String.valueOf(value));
                         }
                     }
 
@@ -311,9 +311,13 @@ public class AlmDynamicUtils {
                     final Map<String/*主键*/, DynamicObject/*数据*/> dynamicObjectMap = dynamicObjectCollection.stream()
                             .collect(Collectors.toMap(it -> it.getString(primaryKeyField.getAnnotation(PrimaryKey.class).value()), it -> it));
                     for (Object o : entryList) {
-                        String id = (String) ReflectionUtils.getValue(o, primaryKeyField);
+                        // 获取对应的主键
+                        Object value = ReflectionUtils.getValue(o, primaryKeyField);
                         // 存在则直接使用,不存在则新增
-                        DynamicObject entryDo = dynamicObjectMap.get(id);
+                        DynamicObject entryDo = null;
+                        if (value != null) {
+                            entryDo = dynamicObjectMap.get(String.valueOf(value));
+                        }
                         if (entryDo == null) {
                             entryDo = dynamicObjectCollection.addNew();
                         }
