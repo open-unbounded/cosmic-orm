@@ -123,6 +123,24 @@ public interface BaseRepository<T> {
     Optional<T> selectOne(T record);
 
     /**
+     * 通过主键查询数据
+     *
+     * @param primaryKey 主键
+     * @return 结果数据
+     */
+    Optional<T> selectOneByPrimaryKey(Object primaryKey);
+
+    /**
+     * 通过主键查询数据,可指定结果类
+     *
+     * @param primaryKey  主键
+     * @param resultClass 结果类
+     * @param <R>         泛型
+     * @return 结果数据
+     */
+    <R> Optional<R> selectOneByPrimaryKey(Object primaryKey, Class<R> resultClass);
+
+    /**
      * 查询满足条件的列表
      * NOTE:生成的查询条件字段之间是AND关系
      *
