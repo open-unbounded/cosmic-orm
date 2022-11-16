@@ -97,7 +97,7 @@ public class AlmDynamicUtils {
             // 向dynamicObject设置数据
             mapDynamicObjectValue(t, allField, dynamicObject);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            log.error(e);
         }
         return dynamicObject;
     }

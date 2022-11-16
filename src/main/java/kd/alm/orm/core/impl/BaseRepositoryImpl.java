@@ -210,10 +210,20 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
         final List<QFilter> qFilters = buildQFilter(record);
         final String entityName = ReflectionUtils.getAnnotationEntity(c).value();
         final Optional<DynamicObject> dynamicObjectOptional = AlmBusinessDataServiceHelper.loadSingleOptional(entityName, qFilters.toArray(new QFilter[0]));
-        if (dynamicObjectOptional.isPresent()) {
-            return Optional.of(AlmDynamicUtils.mapJavaObject(c, dynamicObjectOptional.get()));
-        }
-        return Optional.empty();
+        return dynamicObjectOptional.map(dynamicObject -> AlmDynamicUtils.mapJavaObject(c, dynamicObject));
+    }
+
+    @Override
+    public Optional<T> selectOneByPrimaryKey(Object primaryKey) {
+        return this.selectOneByPrimaryKey(primaryKey, this.entityClass);
+    }
+
+    @Override
+    public <R> Optional<R> selectOneByPrimaryKey(Object primaryKey, Class<R> resultClass) {
+        ReflectionUtils.checkEntity(resultClass);
+        final String entityName = ReflectionUtils.getAnnotationEntity(resultClass).value();
+        final Optional<DynamicObject> dynamicObjectOptional = AlmBusinessDataServiceHelper.loadSingleOptional(primaryKey, entityName);
+        return dynamicObjectOptional.map(dynamicObject -> AlmDynamicUtils.mapJavaObject(resultClass, dynamicObject));
     }
 
     @Override
@@ -252,7 +262,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
         final String entityName = ReflectionUtils.getAnnotationEntity(resultClass).value();
         final DynamicObject[] dynamicObjects = AlmBusinessDataServiceHelper.load(entityName, String.join(",", selectFields), qFilters.toArray(new QFilter[0]), order, top);
 
-        return AlmDynamicUtils.mapJavaObject(resultClass,allField, dynamicObjects);
+        return AlmDynamicUtils.mapJavaObject(resultClass, allField, dynamicObjects);
     }
 
     @Override
@@ -307,7 +317,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
         final DynamicObject[] dynamicObjects = AlmBusinessDataServiceHelper.load(entityName, String.join(",", selectFields), qFilters.toArray(new QFilter[0]), pageRequest.toOrderBys(), pageRequest.getPage(), pageRequest.getSize());
 
         final List<R> list = AlmDynamicUtils.mapJavaObject(resultClass, allField, dynamicObjects);
-        page.getData().addAll(list);
+        page.setData(list);
         return page;
     }
 }
