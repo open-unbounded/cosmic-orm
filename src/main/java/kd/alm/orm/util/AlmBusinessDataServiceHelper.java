@@ -18,8 +18,10 @@ import kd.bos.exception.ErrorCode;
 import kd.bos.exception.KDException;
 import kd.bos.id.ID;
 import kd.bos.orm.ORM;
+import kd.bos.orm.datamanager.DataEntityCacheManager;
 import kd.bos.orm.query.QFilter;
 import kd.bos.orm.query.WithEntityEntryDistinctable;
+import kd.bos.script.annotations.KSMethod;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 
 import java.util.*;
@@ -40,6 +42,32 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      */
     private static final DistributeSessionlessCache cache = CacheFactory.getCommonCacheFactory().getDistributeSessionlessCache();
 
+
+    /**
+     * <p>
+     * 获取对应的单据id缓存
+     * </p>
+     *
+     * @param entityName 表单标识
+     * @param filters 查询条件
+     * @return 单据ids
+     * @author wentao.liu01@foxmail.com 2022-11-17 10:56
+     */
+    public static Object[] loadPKFromCache(String entityName, QFilter[] filters) {
+        DynamicObjectType type = getSubEntityType(entityName, "id");
+        List<Object> idList = new ArrayList<>();
+        DataEntityCacheManager cacheManager = new DataEntityCacheManager(type);
+        Object[] pks = cacheManager.getCachePks(filters);
+        if (pks == null) {
+            DataSet ds = ORM.create().queryDataSet("BusinessDataServiceHelper.loadPKFromCache", entityName, "id", filters, null, -1, WithEntityEntryDistinctable.get());
+            while (ds.hasNext()){
+                idList.add(ds.next().get(0));
+            }
+            pks = idList.toArray();
+            cacheManager.putCachePks(filters, pks);
+        }
+        return pks;
+    }
 
     /**
      * 分页和排序查询
