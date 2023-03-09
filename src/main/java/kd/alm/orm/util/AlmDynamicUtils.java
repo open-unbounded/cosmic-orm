@@ -168,7 +168,7 @@ public class AlmDynamicUtils {
                     // 获得字段属性
                     final IDataEntityProperty iDataEntityProperty = getProperties(dynamicObject).get(formFieldName);
                     if (iDataEntityProperty == null) {
-                        throw new OrmRuntimeException("苍穹中不存在此字段");
+                        throw new OrmRuntimeException(String.format("苍穹中不存在[%s]字段", formFieldName));
                     }
                     if (iDataEntityProperty instanceof MulComboProp && field.getType().equals(MulValueSet.class)) {
                         // 设置多值集
@@ -371,7 +371,7 @@ public class AlmDynamicUtils {
             return;
         }
         final MulComboProp iDataEntityProperty = (MulComboProp) dynamicObject.getDynamicObjectType().getProperties().get(formFieldName);
-        final Map<String, LocaleString> valueSetMap = iDataEntityProperty.getComboItems().stream().collect(Collectors.toMap(it -> it.getValue(), it -> it.getName()));
+        final Map<String, LocaleString> valueSetMap = iDataEntityProperty.getComboItems().stream().collect(Collectors.toMap(ValueMapItem::getValue, ValueMapItem::getName));
         final String mutValueSet = (String) o;
 
         // 构建值集
@@ -417,7 +417,7 @@ public class AlmDynamicUtils {
 
     }
 
-    private static <R> void handleSpecialType(Object valueSetValue, IDataEntityProperty iDataEntityProperty, Field field, Field[] allField, R t) throws IllegalAccessException, InstantiationException {
+    private static <R> void handleSpecialType(Object valueSetValue, IDataEntityProperty iDataEntityProperty, Field field, Field[] allField, R t) throws IllegalAccessException {
         // 非多选,单选
         if (!(iDataEntityProperty instanceof MulComboProp) && iDataEntityProperty instanceof ComboProp && field.isAnnotationPresent(ValueSet.class)) {
             // 下拉框
