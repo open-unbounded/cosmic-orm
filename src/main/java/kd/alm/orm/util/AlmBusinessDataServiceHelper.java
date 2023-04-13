@@ -268,6 +268,20 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * 查询多条DynamicObject
      *
      * @param entityName 表单标识
+     * @param qFilter
+     * @return
+     */
+    public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter qFilter) {
+        return loadOptional(entityName, qFilter.toArray(), null);
+    }
+    public static Optional<DynamicObject[]> loadOptional(String entityName, List<QFilter> qFilterList) {
+        return loadOptional(entityName, qFilterList.toArray(new QFilter[0]), null);
+    }
+
+    /**
+     * 查询多条DynamicObject
+     *
+     * @param entityName 表单标识
      * @param filters
      * @return
      */
@@ -280,11 +294,17 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @param entityName 表单标识
      * @param filters 过滤条件
      * @param orderBy 排序条件
+     * @param page 页数
+     * @param size 一页最大数
      * @return
      */
-    public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter[] filters, String orderBy) {
+    public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter[] filters, String orderBy, int page, int size) {
 
-        final DynamicObject[] dynamicObjectCollection = AlmBusinessDataServiceHelper.load(entityName, "id", filters, orderBy);
+        final DynamicObject[] dynamicObjectCollection = AlmBusinessDataServiceHelper.load(entityName, "id", filters, orderBy, page, size);
+        return getDynamicObjects(entityName, orderBy, dynamicObjectCollection);
+    }
+
+    private static Optional<DynamicObject[]> getDynamicObjects(String entityName, String orderBy, DynamicObject[] dynamicObjectCollection) {
         Object[] pks = Arrays.stream(dynamicObjectCollection).map(e -> e.get("id")).toArray();
         DynamicObjectType type = EntityMetadataCache.getDataEntityType(entityName);
 
@@ -298,6 +318,19 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
             return Optional.of(list);
         }
         return Optional.empty();
+    }
+
+    /**
+     * 查询多条DynamicObject
+     * @param entityName 表单标识
+     * @param filters 过滤条件
+     * @param orderBy 排序条件
+     * @return
+     */
+    public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter[] filters, String orderBy) {
+
+        final DynamicObject[] dynamicObjectCollection = AlmBusinessDataServiceHelper.load(entityName, "id", filters, orderBy);
+        return getDynamicObjects(entityName, orderBy, dynamicObjectCollection);
     }
 
     private static DynamicObject[] orderBy(DynamicObject[] dynamicObjects, List<Object> idList, String orderBy) {
