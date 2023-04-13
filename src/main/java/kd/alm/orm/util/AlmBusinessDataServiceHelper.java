@@ -21,6 +21,7 @@ import kd.bos.orm.ORM;
 import kd.bos.orm.datamanager.DataEntityCacheManager;
 import kd.bos.orm.query.QFilter;
 import kd.bos.orm.query.WithEntityEntryDistinctable;
+import kd.bos.script.annotations.KSMethod;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
 
 import java.util.*;
