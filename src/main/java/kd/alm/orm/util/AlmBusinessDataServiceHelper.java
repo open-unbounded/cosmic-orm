@@ -18,11 +18,10 @@ import kd.bos.exception.ErrorCode;
 import kd.bos.exception.KDException;
 import kd.bos.id.ID;
 import kd.bos.orm.ORM;
-import kd.bos.orm.datamanager.DataEntityCacheManager;
 import kd.bos.orm.query.QFilter;
 import kd.bos.orm.query.WithEntityEntryDistinctable;
-import kd.bos.script.annotations.KSMethod;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -42,32 +41,6 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      */
     private static final DistributeSessionlessCache cache = CacheFactory.getCommonCacheFactory().getDistributeSessionlessCache();
 
-
-    /**
-     * <p>
-     * 获取对应的单据id缓存
-     * </p>
-     *
-     * @param entityName 表单标识
-     * @param filters 查询条件
-     * @return 单据ids
-     * @author wentao.liu01@foxmail.com 2022-11-17 10:56
-     */
-    public static Object[] loadPKFromCache(String entityName, QFilter[] filters) {
-        DynamicObjectType type = getSubEntityType(entityName, "id");
-        List<Object> idList = new ArrayList<>();
-        DataEntityCacheManager cacheManager = new DataEntityCacheManager(type);
-        Object[] pks = cacheManager.getCachePks(filters);
-        if (pks == null) {
-            DataSet ds = ORM.create().queryDataSet("BusinessDataServiceHelper.loadPKFromCache", entityName, "id", filters, null, -1, WithEntityEntryDistinctable.get());
-            while (ds.hasNext()){
-                idList.add(ds.next().get(0));
-            }
-            pks = idList.toArray();
-            cacheManager.putCachePks(filters, pks);
-        }
-        return pks;
-    }
 
     /**
      * 分页和排序查询
@@ -196,7 +169,7 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @return Optional<DynamicObject>
      */
     public static Optional<DynamicObject> loadSingleOptional(Object pk, String entityName) {
-        if (pk == null || "0".equals(pk.toString()) || StringUtils.isEmpty(pk.toString())) {
+        if (pk == null) {
             return Optional.empty();
         }
 
@@ -214,7 +187,7 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @return Optional<DynamicObject>
      */
     public static Optional<DynamicObject> loadSingleOptional(Object pk, DynamicObjectType type) {
-        if (pk == null || "0".equals(pk.toString()) || StringUtils.isEmpty(pk.toString())) {
+        if (pk == null) {
             return Optional.empty();
         }
 
@@ -263,6 +236,19 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
         return loadSingleOptional(() -> loadSingleOptional(dynamicObject.getPkValue(), entityName));
     }
 
+    /**
+     * 查询多条DynamicObject
+     *
+     * @param entityName 表单标识
+     * @param qFilter
+     * @return
+     */
+    public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter qFilter) {
+        return loadOptional(entityName, qFilter.toArray(), null);
+    }
+    public static Optional<DynamicObject[]> loadOptional(String entityName, List<QFilter> qFilterList) {
+        return loadOptional(entityName, qFilterList.toArray(new QFilter[0]), null);
+    }
 
     /**
      * 查询多条DynamicObject
@@ -282,9 +268,14 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @param orderBy 排序条件
      * @return
      */
-    public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter[] filters, String orderBy) {
+    public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter[] filters, String orderBy, int page, int size) {
 
-        final DynamicObject[] dynamicObjectCollection = AlmBusinessDataServiceHelper.load(entityName, "id", filters, orderBy);
+        final DynamicObject[] dynamicObjectCollection = AlmBusinessDataServiceHelper.load(entityName, "id", filters, orderBy, page, size);
+        return getDynamicObjects(entityName, orderBy, dynamicObjectCollection);
+    }
+
+    @NotNull
+    private static Optional<DynamicObject[]> getDynamicObjects(String entityName, String orderBy, DynamicObject[] dynamicObjectCollection) {
         Object[] pks = Arrays.stream(dynamicObjectCollection).map(e -> e.get("id")).toArray();
         DynamicObjectType type = EntityMetadataCache.getDataEntityType(entityName);
 
@@ -298,6 +289,19 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
             return Optional.of(list);
         }
         return Optional.empty();
+    }
+
+    /**
+     * 查询多条DynamicObject
+     * @param entityName 表单标识
+     * @param filters 过滤条件
+     * @param orderBy 排序条件
+     * @return
+     */
+    public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter[] filters, String orderBy) {
+
+        final DynamicObject[] dynamicObjectCollection = AlmBusinessDataServiceHelper.load(entityName, "id", filters, orderBy);
+        return getDynamicObjects(entityName, orderBy, dynamicObjectCollection);
     }
 
     private static DynamicObject[] orderBy(DynamicObject[] dynamicObjects, List<Object> idList, String orderBy) {
