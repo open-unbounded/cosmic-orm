@@ -21,9 +21,7 @@ import kd.bos.orm.ORM;
 import kd.bos.orm.datamanager.DataEntityCacheManager;
 import kd.bos.orm.query.QFilter;
 import kd.bos.orm.query.WithEntityEntryDistinctable;
-import kd.bos.script.annotations.KSMethod;
 import kd.bos.servicehelper.BusinessDataServiceHelper;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -290,7 +288,6 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
         return getDynamicObjects(entityName, orderBy, dynamicObjectCollection);
     }
 
-    @NotNull
     private static Optional<DynamicObject[]> getDynamicObjects(String entityName, String orderBy, DynamicObject[] dynamicObjectCollection) {
         Object[] pks = Arrays.stream(dynamicObjectCollection).map(e -> e.get("id")).toArray();
         DynamicObjectType type = EntityMetadataCache.getDataEntityType(entityName);
