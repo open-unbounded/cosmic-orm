@@ -251,24 +251,6 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
 
     /**
      * @param entityName 表单标识
-     * @param qFilter
-     * @return
-     */
-    public static Optional<DynamicObject> loadSingleOptional(String entityName, QFilter qFilter) {
-        return loadSingleOptional(entityName, qFilter.toArray());
-    }
-
-    /**
-     * @param entityName 表单标识
-     * @param qFilterList
-     * @return
-     */
-    public static Optional<DynamicObject> loadSingleOptional(String entityName, List<QFilter> qFilterList) {
-        return loadSingleOptional(entityName, qFilterList.toArray(new QFilter[0]));
-    }
-
-    /**
-     * @param entityName 表单标识
      * @param filters
      * @return
      */
@@ -280,20 +262,6 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
         return loadSingleOptional(() -> loadSingleOptional(dynamicObject.getPkValue(), entityName));
     }
 
-
-    /**
-     * 查询多条DynamicObject
-     *
-     * @param entityName 表单标识
-     * @param qFilter
-     * @return
-     */
-    public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter qFilter) {
-        return loadOptional(entityName, qFilter.toArray(), null);
-    }
-    public static Optional<DynamicObject[]> loadOptional(String entityName, List<QFilter> qFilterList) {
-        return loadOptional(entityName, qFilterList.toArray(new QFilter[0]), null);
-    }
 
     /**
      * 查询多条DynamicObject
