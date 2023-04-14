@@ -255,6 +255,9 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @return
      */
     public static Optional<DynamicObject> loadSingleOptional(String entityName, QFilter qFilter) {
+        if (null == qFilter){
+            return loadSingleOptional(entityName, new QFilter[]{});
+        }
         return loadSingleOptional(entityName, qFilter.toArray());
     }
 
@@ -264,6 +267,9 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @return
      */
     public static Optional<DynamicObject> loadSingleOptional(String entityName, List<QFilter> qFilterList) {
+        if (null == qFilterList){
+            return loadSingleOptional(entityName, new QFilter[]{});
+        }
         return loadSingleOptional(entityName, qFilterList.toArray(new QFilter[0]));
     }
 
@@ -289,9 +295,15 @@ public class AlmBusinessDataServiceHelper extends BusinessDataServiceHelper {
      * @return
      */
     public static Optional<DynamicObject[]> loadOptional(String entityName, QFilter qFilter) {
+        if (null == qFilter){
+            return loadOptional(entityName, null, null);
+        }
         return loadOptional(entityName, qFilter.toArray(), null);
     }
     public static Optional<DynamicObject[]> loadOptional(String entityName, List<QFilter> qFilterList) {
+        if (null == qFilterList){
+            return loadOptional(entityName, null, null);
+        }
         return loadOptional(entityName, qFilterList.toArray(new QFilter[0]), null);
     }
 
