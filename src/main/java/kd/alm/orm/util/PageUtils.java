@@ -30,7 +30,7 @@ public class PageUtils {
         //page = -2，不分页
         if (pageRequest.getPage() == -2){
             pageRequest.setSize(total);
-            pageRequest.setPage(1);
+            pageRequest.setPage(0);
         }
 
         // 计算总页数

@@ -97,7 +97,7 @@ public class AlmDynamicUtils {
             // 向dynamicObject设置数据
             mapDynamicObjectValue(t, allField, dynamicObject);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            log.error(e);
         }
         return dynamicObject;
     }
@@ -168,7 +168,7 @@ public class AlmDynamicUtils {
                     // 获得字段属性
                     final IDataEntityProperty iDataEntityProperty = getProperties(dynamicObject).get(formFieldName);
                     if (iDataEntityProperty == null) {
-                        throw new OrmRuntimeException("苍穹中不存在此字段");
+                        throw new OrmRuntimeException(String.format("苍穹中不存在[%s]字段", formFieldName));
                     }
                     if (iDataEntityProperty instanceof MulComboProp && field.getType().equals(MulValueSet.class)) {
                         // 设置多值集
@@ -299,9 +299,9 @@ public class AlmDynamicUtils {
                     Set<String> keys = new HashSet<>();
                     for (Object o : entryList) {
                         // 获取对应的主键
-                        String value = (String) ReflectionUtils.getValue(o, primaryKeyField);
+                        Object value = ReflectionUtils.getValue(o, primaryKeyField);
                         if (value != null) {
-                            keys.add(value);
+                            keys.add(String.valueOf(value));
                         }
                     }
 
@@ -311,9 +311,13 @@ public class AlmDynamicUtils {
                     final Map<String/*主键*/, DynamicObject/*数据*/> dynamicObjectMap = dynamicObjectCollection.stream()
                             .collect(Collectors.toMap(it -> it.getString(primaryKeyField.getAnnotation(PrimaryKey.class).value()), it -> it));
                     for (Object o : entryList) {
-                        String id = (String) ReflectionUtils.getValue(o, primaryKeyField);
+                        // 获取对应的主键
+                        Object value = ReflectionUtils.getValue(o, primaryKeyField);
                         // 存在则直接使用,不存在则新增
-                        DynamicObject entryDo = dynamicObjectMap.get(id);
+                        DynamicObject entryDo = null;
+                        if (value != null) {
+                            entryDo = dynamicObjectMap.get(String.valueOf(value));
+                        }
                         if (entryDo == null) {
                             entryDo = dynamicObjectCollection.addNew();
                         }
@@ -367,7 +371,7 @@ public class AlmDynamicUtils {
             return;
         }
         final MulComboProp iDataEntityProperty = (MulComboProp) dynamicObject.getDynamicObjectType().getProperties().get(formFieldName);
-        final Map<String, LocaleString> valueSetMap = iDataEntityProperty.getComboItems().stream().collect(Collectors.toMap(it -> it.getValue(), it -> it.getName()));
+        final Map<String, LocaleString> valueSetMap = iDataEntityProperty.getComboItems().stream().collect(Collectors.toMap(ValueMapItem::getValue, ValueMapItem::getName));
         final String mutValueSet = (String) o;
 
         // 构建值集
@@ -413,7 +417,7 @@ public class AlmDynamicUtils {
 
     }
 
-    private static <R> void handleSpecialType(Object valueSetValue, IDataEntityProperty iDataEntityProperty, Field field, Field[] allField, R t) throws IllegalAccessException, InstantiationException {
+    private static <R> void handleSpecialType(Object valueSetValue, IDataEntityProperty iDataEntityProperty, Field field, Field[] allField, R t) throws IllegalAccessException {
         // 非多选,单选
         if (!(iDataEntityProperty instanceof MulComboProp) && iDataEntityProperty instanceof ComboProp && field.isAnnotationPresent(ValueSet.class)) {
             // 下拉框
