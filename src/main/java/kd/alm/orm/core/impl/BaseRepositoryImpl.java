@@ -52,21 +52,23 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
      * @return 泛型Class
      */
     private Class<T> getGenericType(Class<?> c) {
-        Type genType = c.getGenericSuperclass();
-        if (!(genType instanceof ParameterizedType)) {
-            return (Class<T>) Object.class;
-        } else {
-            Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
-            if (0 < params.length) {
-                if (!(params[0] instanceof Class)) {
-                    return (Class<T>) Object.class;
+        for (; !(c.getSuperclass().equals(Object.class)); ) {
+            Type genType = c.getGenericSuperclass();
+            if (genType instanceof ParameterizedType) {
+                Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
+                if (0 < params.length) {
+                    if (!(params[0] instanceof Class)) {
+                        return (Class<T>) Object.class;
+                    } else {
+                        return (Class<T>) params[0];
+                    }
                 } else {
-                    return (Class<T>) params[0];
+                    return (Class<T>) Object.class;
                 }
-            } else {
-                return (Class<T>) Object.class;
             }
+            c = c.getSuperclass();
         }
+        return (Class<T>) Object.class;
     }
 
     @Override
