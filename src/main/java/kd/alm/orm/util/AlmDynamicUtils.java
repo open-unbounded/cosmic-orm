@@ -270,6 +270,9 @@ public class AlmDynamicUtils {
                         // 必录校验
                         if (((BasedataProp) property).isMustInput()) {
                             throw new KDBizException(String.format("[%s]字段对应的基础资料数据不存在,该字段为必录字段", field.getName()));
+                        } else {
+                            // 如果沒获取到对应的数据，并且不是必输，则设置为空
+                            dynamicObject.set(formFieldName, null);
                         }
                     }
                 } else {
