@@ -125,7 +125,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
 
         for (Field field : allField) {
             if (ReflectionUtils.isAnnotationPresent(field, PrimaryKey.class)) {
-                selectFields.add("id");
+                selectFields.add(field.getAnnotation(PrimaryKey.class).value());
             } else if (ReflectionUtils.isAnnotationPresent(field, kd.alm.orm.annotation.Field.class)) {
                 String formFiledName = field.getAnnotation(kd.alm.orm.annotation.Field.class).value();
                 if (StringUtils.isBlank(formFiledName)) {
