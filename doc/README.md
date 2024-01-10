@@ -1,8 +1,8 @@
 # 一. 概述
-ORM 基于`kd.alm.utils.db.BaseRepository`和`kd.alm.utils.db.BaseService`接口并搭配四个注解`kd.alm.utils.db.annotation.Entity`,`kd.alm.utils.db.annotation.PrimaryKey`,`kd.alm.utils.db.annotation.Field`,`kd.alm.utils.db.annotation.Entry`构建.
-## 1.1 `kd.alm.utils.db.BaseRepository`接口
+ORM 基于`digi.alm.utils.db.BaseRepository`和`digi.alm.utils.db.BaseService`接口并搭配四个注解`digi.alm.utils.db.annotation.Entity`,`digi.alm.utils.db.annotation.PrimaryKey`,`digi.alm.utils.db.annotation.Field`,`digi.alm.utils.db.annotation.Entry`构建.
+## 1.1 `digi.alm.utils.db.BaseRepository`接口
 ```java
-package kd.alm.utils.db;
+package digi.alm.utils.db;
 
 import kd.bos.dataentity.OperateOption;
 import kd.bos.entity.operate.result.OperationResult;
@@ -162,10 +162,10 @@ public interface BaseRepository<T> {
 }
 
 ```
-## 1.2 `kd.alm.utils.db.BaseService`接口
-目前`kd.alm.utils.db.BaseService`接口均来自`kd.alm.utils.db.BaseRepository`
+## 1.2 `digi.alm.utils.db.BaseService`接口
+目前`digi.alm.utils.db.BaseService`接口均来自`digi.alm.utils.db.BaseRepository`
 ```java
-package kd.alm.utils.db;
+package digi.alm.utils.db;
 
 /**
  * </p>
@@ -179,10 +179,10 @@ public interface BaseService<T>  extends BaseRepository<T> {
 }
 
 ```
-## 1.3 `kd.alm.utils.db.annotation.Entity`注解
+## 1.3 `digi.alm.utils.db.annotation.Entity`注解
 用于针对数据表表单或单据体对应的实体类进行注解,定义代码如下:
 ```java
-package kd.alm.utils.db.annotation;
+package digi.alm.utils.db.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -212,12 +212,12 @@ public @interface Entity {
 
 ```
 
-1. 当前实体类对应表单,例如`digi_pr`,则在类上添加`@kd.alm.utils.db.annotation.Entity("digi_pr")`
-1. 当前实体类对应单据体,例如表单`digi_pr`中的单据体`digi_pr_line`,则在类上添加`@kd.alm.utils.db.annotation.Entity("digi_pr.digi_pr_line")`
-## 1.4 `kd.alm.utils.db.annotation.PrimaryKey`注解
+1. 当前实体类对应表单,例如`digi_pr`,则在类上添加`@digi.alm.utils.db.annotation.Entity("digi_pr")`
+1. 当前实体类对应单据体,例如表单`digi_pr`中的单据体`digi_pr_line`,则在类上添加`@digi.alm.utils.db.annotation.Entity("digi_pr.digi_pr_line")`
+## 1.4 `digi.alm.utils.db.annotation.PrimaryKey`注解
 用于针对数据表表单或单据体对应的实体类中的主键字段进行注解,定义代码如下:
 ```java
-package kd.alm.utils.db.annotation;
+package digi.alm.utils.db.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -241,10 +241,10 @@ public @interface PrimaryKey {
 }
 
 ```
-## 1.5 `kd.alm.utils.db.annotation.Field`注解
+## 1.5 `digi.alm.utils.db.annotation.Field`注解
 用于针对数据表表单或单据体对应的实体类中的非主键字段和非当前数据表但需要映射的字段进行注解,定义代码如下:
 ```java
-package kd.alm.utils.db.annotation;
+package digi.alm.utils.db.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -281,17 +281,17 @@ public @interface Field {
 # 二 基础代码构建
 ## 2.1 建立苍穹表单与Java 实体类的对应关系
 所有的对应数据表的实体Class需要添加`@Entity`并注明其表示的表单标识,同时使用 `@Field`注解数据表字段
-以`kd.alm.entity.Pr`为例:
+以`digi.alm.entity.Pr`为例:
 `@PrimaryKey`:表示`id`对应着`digi_pr`表单的主键
 `@Entity("digi_pr")`:表示`Pr`实体类对应着`digi_pr`表单
 `@Field("digi_name")`:表示`name`字段对应`digi_pr`表单中`digi_name`字段
 `@Entry("digi_pr_line")`表示`prLineList`字段对应`digi_pr`表单中`digi_pr_line`单据体
 ```java
-package kd.alm.entity;
+package digi.alm.entity;
 
-import kd.alm.utils.db.annotation.Entity;
-import kd.alm.utils.db.annotation.Entry;
-import kd.alm.utils.db.annotation.Field;
+import digi.alm.utils.db.annotation.Entity;
+import digi.alm.utils.db.annotation.Entry;
+import digi.alm.utils.db.annotation.Field;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -397,14 +397,14 @@ public class Pr extends TemplateEntity implements Serializable {
 
 ```
 **注:单据体也是一个独立的数据表因此它也有对应的实体类**
-`@Entity("digi_pr.digi_pr_line")`:表示`kd.alm.entity.PrLine`实体类对应着`digi_pr.digi_pr_line`单据体
+`@Entity("digi_pr.digi_pr_line")`:表示`digi.alm.entity.PrLine`实体类对应着`digi_pr.digi_pr_line`单据体
 `@PrimaryKey`:表示`id`实体类对应着`digi_pr.digi_pr_line`单据体的主键
 ```java
-package kd.alm.entity;
+package digi.alm.entity;
 
-import kd.alm.utils.db.annotation.Entity;
-import kd.alm.utils.db.annotation.Field;
-import kd.alm.utils.db.annotation.PrimaryKey;
+import digi.alm.utils.db.annotation.Entity;
+import digi.alm.utils.db.annotation.Field;
+import digi.alm.utils.db.annotation.PrimaryKey;
 import lombok.Data;
 import lombok.ToString;
 
@@ -534,15 +534,15 @@ public class PrLine implements Serializable {
 
 ```
 ## 2.2 资源库(Repository)与服务层(BaseService)继承ORM基础接口
-以`kd.alm.entity.Pr`实体类对应的资源库(`kd.alm.repository.PrRepository`)和服务层`kd.alm.service.PrService`为例.
+以`digi.alm.entity.Pr`实体类对应的资源库(`digi.alm.repository.PrRepository`)和服务层`digi.alm.service.PrService`为例.
 
-1. 资源库:`kd.alm.repository.PrRepository`继承`kd.alm.utils.db.BaseRepository<T>` 其中T为实体类`kd.alm.entity.Pr`
+1. 资源库:`digi.alm.repository.PrRepository`继承`digi.alm.utils.db.BaseRepository<T>` 其中T为实体类`digi.alm.entity.Pr`
 ```java
-package kd.alm.repository;
+package digi.alm.repository;
 
-import kd.alm.controller.dto.pr.PrDetailOneResultDTO;
-import kd.alm.entity.Pr;
-import kd.alm.utils.db.BaseRepository;
+import digi.alm.controller.dto.pr.PrDetailOneResultDTO;
+import digi.alm.entity.Pr;
+import digi.alm.utils.db.BaseRepository;
 
 import java.util.Optional;
 
@@ -573,14 +573,14 @@ public interface PrRepository extends BaseRepository<Pr> {
 
 ```
 
-2. 服务层:`kd.alm.service.PrService`继承`kd.alm.utils.db.BaseService<T>` 其中T为实体类`kd.alm.entity.Pr`
+2. 服务层:`digi.alm.service.PrService`继承`digi.alm.utils.db.BaseService<T>` 其中T为实体类`digi.alm.entity.Pr`
 ```java
-package kd.alm.service;
+package digi.alm.service;
 
-import kd.alm.controller.dto.pr.PrDetailOneResultDTO;
-import kd.alm.entity.Pr;
-import kd.alm.utils.db.BaseService;
-import kd.alm.utils.db.BaseServiceImpl;
+import digi.alm.controller.dto.pr.PrDetailOneResultDTO;
+import digi.alm.entity.Pr;
+import digi.alm.utils.db.BaseService;
+import digi.alm.utils.db.BaseServiceImpl;
 
 import java.util.Optional;
 
@@ -597,21 +597,21 @@ public interface PrService  extends BaseService<Pr> {
 
 ```
 ## 2.3 资源库实现(RepositoryImpl)与服务层实现(BaseServiceImpl)继承ORM基础接口的默认实现
-以`kd.alm.entity.Pr`实体类对应的资源库实现(`kd.alm.repository.impl.PrRepositoryImpl`)和服务层实现`kd.alm.service.PrServiceImpl`为例
+以`digi.alm.entity.Pr`实体类对应的资源库实现(`digi.alm.repository.impl.PrRepositoryImpl`)和服务层实现`digi.alm.service.PrServiceImpl`为例
 
-1. 资源库实现:`kd.alm.repository.impl.PrRepositoryImpl`实现`kd.alm.repository.PrRepository`接口并继承`kd.alm.utils.db.BaseRepositoryImpl<T>`其中T为实体类`kd.alm.entity.Pr`
+1. 资源库实现:`digi.alm.repository.impl.PrRepositoryImpl`实现`digi.alm.repository.PrRepository`接口并继承`digi.alm.utils.db.BaseRepositoryImpl<T>`其中T为实体类`digi.alm.entity.Pr`
 ```java
-package kd.alm.repository.impl;
+package digi.alm.repository.impl;
 
-import kd.alm.constants.EntityConstants;
-import kd.alm.controller.dto.pr.PrDetailOneResultDTO;
-import kd.alm.entity.Pr;
-import kd.alm.entity.PrLine;
-import kd.alm.repository.PrRepository;
-import kd.alm.service.impl.DemandApplyServiceImpl;
-import kd.alm.utils.AlmBusinessDataServiceHelper;
-import kd.alm.utils.ResponseUtils;
-import kd.alm.utils.db.BaseRepositoryImpl;
+import digi.alm.constants.EntityConstants;
+import digi.alm.controller.dto.pr.PrDetailOneResultDTO;
+import digi.alm.entity.Pr;
+import digi.alm.entity.PrLine;
+import digi.alm.repository.PrRepository;
+import digi.alm.service.impl.DemandApplyServiceImpl;
+import digi.alm.utils.AlmBusinessDataServiceHelper;
+import digi.alm.utils.ResponseUtils;
+import digi.alm.utils.db.BaseRepositoryImpl;
 import kd.bos.context.RequestContext;
 import kd.bos.dataentity.OperateOption;
 import kd.bos.dataentity.entity.DynamicObject;
@@ -741,15 +741,15 @@ public class PrRepositoryImpl extends BaseRepositoryImpl<Pr> implements PrReposi
 
 ```
 
-2. 服务层实现:`kd.alm.service.impl.PrServiceImpl`实现`kd.alm.service.PrService`接口继承`kd.alm.utils.db.BaseServiceImpl<T>`其中T为实体类`kd.alm.entity.Pr`
+2. 服务层实现:`digi.alm.service.impl.PrServiceImpl`实现`digi.alm.service.PrService`接口继承`digi.alm.utils.db.BaseServiceImpl<T>`其中T为实体类`digi.alm.entity.Pr`
 ```java
-package kd.alm.service.impl;
+package digi.alm.service.impl;
 
-import kd.alm.controller.dto.pr.PrDetailOneResultDTO;
-import kd.alm.entity.Pr;
-import kd.alm.repository.PrRepository;
-import kd.alm.service.PrService;
-import kd.alm.utils.db.BaseServiceImpl;
+import digi.alm.controller.dto.pr.PrDetailOneResultDTO;
+import digi.alm.entity.Pr;
+import digi.alm.repository.PrRepository;
+import digi.alm.service.PrService;
+import digi.alm.utils.db.BaseServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -788,17 +788,17 @@ final List<Pr> list = prRepository.select("number", "PR-000141");
 ```
 ### 3.1.2 根据指定的字段查询并指定返回类泛型`R`: `<R> List<R> select(String key, Object value, Class<R> resultClass)`
 示例:
-`kd.alm.controller.dto.pr.PrDetailOneResultDTO`继承于`kd.alm.entity.Pr`因此在ORM中会继承`kd.alm.entity.Pr`中的`@Entity("digi_pr")`注解
+`digi.alm.controller.dto.pr.PrDetailOneResultDTO`继承于`digi.alm.entity.Pr`因此在ORM中会继承`digi.alm.entity.Pr`中的`@Entity("digi_pr")`注解
 
 1. `@Field(value = "digi_user_id.name", isDBField = false)`表示`userName`字段是非当前数据表字段,目前在查询基础资料非主键字段可用,通过`digi_user_id.xxx`(其中`xxx`为基础资料字段标识)查询到该基础资料中`xxx`字段的数据
 1. `@Entry(value = "digi_pr_line", mapClass = PrLineDetailOneResultDTO.class)`:表示`prLineList`字段对应`digi_pr`表单中`digi_pr_line`单据体,并且将`List<PrLine> prLineList`中的`PrLine`最终映射为`PrLineDetailOneResultDTO`类(注意:`mapClass`所指向类型必须是List<T> 中T的子类或同类)
 ```java
-package kd.alm.controller.dto.pr;
+package digi.alm.controller.dto.pr;
 
-import kd.alm.entity.Pr;
-import kd.alm.entity.PrLine;
-import kd.alm.utils.db.annotation.Entry;
-import kd.alm.utils.db.annotation.Field;
+import digi.alm.entity.Pr;
+import digi.alm.entity.PrLine;
+import digi.alm.utils.db.annotation.Entry;
+import digi.alm.utils.db.annotation.Field;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -878,10 +878,10 @@ public class PrDetailOneResultDTO extends Pr {
 `**PrLineDetailOneResultDTO**`**Class:**
 **由于**`PrLineDetailOneResultDTO`继承
 ```java
-package kd.alm.controller.dto.pr;
+package digi.alm.controller.dto.pr;
 
-import kd.alm.entity.PrLine;
-import kd.alm.utils.db.annotation.Field;
+import digi.alm.entity.PrLine;
+import digi.alm.utils.db.annotation.Field;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
