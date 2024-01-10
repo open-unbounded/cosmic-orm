@@ -13,20 +13,6 @@ repositories {
     maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
     maven { url 'http://maven.aliyun.com/nexus/content/repositories/jcenter' }
     mavenCentral()
-    maven {
-        credentials {
-            username '600e21e54fb2132a19dcd064'
-            password 'KomhsDCOTCF-'
-        }
-        url 'https://packages.aliyun.com/maven/repository/2070470-release-UxBa7E/'
-    }
-    maven {
-        credentials {
-            username '600e21e54fb2132a19dcd064'
-            password 'KomhsDCOTCF-'
-        }
-        url 'https://packages.aliyun.com/maven/repository/2070470-snapshot-0pdCJB/'
-    }
 }
 def ormVersion = '1.0.11-SNAPSHOT'
 group = 'digi.alm'
@@ -104,14 +90,3 @@ task copyJarTodir(type: Copy) {
 }
 test.ignoreFailures true
 
-// 上传jar到远程阿里仓库
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            repository(url: "https://packages.aliyun.com/maven/repository/2070470-snapshot-0pdCJB/") {
-                // 配置maven库的用户名和密码 (userName/password)
-                authentication(userName: "600e21e54fb2132a19dcd064", password: "KomhsDCOTCF-")
-            }
-        }
-    }
-}
