@@ -246,7 +246,9 @@ public class AlmDynamicUtils {
 
                     // 必录校验
                     if (((BasedataProp) property).isMustInput() && (v == null || "0".equals(v))) {
-                        throw new KDBizException(String.format("[%s]字段对应的基础资料数据不存在,该字段为必录字段", field.getName()));
+                        log.error(String.format("[%s]字段对应的基础资料数据不存在,该字段为必录字段", field.getName()));
+                        dynamicObject.set(formFieldName, null);
+                        return;
                     }
                     // 基础资料字段对应的表单标识
                     String entityName;
@@ -269,7 +271,8 @@ public class AlmDynamicUtils {
                     } else {
                         // 必录校验
                         if (((BasedataProp) property).isMustInput()) {
-                            throw new KDBizException(String.format("[%s]字段对应的基础资料数据不存在,该字段为必录字段", field.getName()));
+                            log.error(String.format("[%s]字段对应的基础资料数据不存在,该字段为必录字段", field.getName()));
+                            dynamicObject.set(formFieldName, null);
                         } else {
                             // 如果沒获取到对应的数据，并且不是必输，则设置为空
                             dynamicObject.set(formFieldName, null);

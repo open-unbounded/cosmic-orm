@@ -640,8 +640,8 @@ public class AlmDB {
                         value = null;
                         // 数据不存在
                         if (!isIgnoreMustInput && ((BasedataProp) entityProperty).isMustInput() && !tmp.equals(0L)) {
-
-                            throw new KDBizException(String.format("[%s]字段对应的基础资料数据不存在", fieldName));
+                            log.error(String.format("[%s]字段对应的基础资料数据不存在", fieldName));
+                            dynamicObject.set(markFieldName, null);
                         }
                     }
                 }
