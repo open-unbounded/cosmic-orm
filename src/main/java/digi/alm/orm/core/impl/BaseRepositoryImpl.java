@@ -14,8 +14,10 @@ import kd.bos.entity.operate.result.OperationResult;
 import kd.bos.exception.KDBizException;
 import kd.bos.logging.Log;
 import kd.bos.logging.LogFactory;
+import kd.bos.orm.ORM;
 import kd.bos.orm.query.QCP;
 import kd.bos.orm.query.QFilter;
+import kd.bos.orm.query.WithDistinctable;
 import kd.bos.servicehelper.operation.DeleteServiceHelper;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -202,8 +204,7 @@ public class BaseRepositoryImpl<T> implements BaseRepository<T> {
     public <R> int selectCount(List<QFilter> qFilters, Class<R> queryClass) {
         ReflectionUtils.checkEntity(queryClass);
         final String entityName = ReflectionUtils.getAnnotationEntity(queryClass).value();
-        final DynamicObject[] dynamicObjects = AlmBusinessDataServiceHelper.load(entityName, "id", qFilters.toArray(new QFilter[0]));
-        return dynamicObjects != null ? dynamicObjects.length : 0;
+        return ORM.create().count(entityName+"_selectCount",entityName, "id", qFilters.toArray(new QFilter[0]), WithDistinctable.get());
     }
 
     @Override
